@@ -1,25 +1,22 @@
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router } from "react-router-dom";
+import Header from "./Components/Common/Header";
+import Footer from "./Components/Common/Footer";
+import ScrollToTop from "./Components/Partials/ScrollToTop"; // Adjust if needed
+import AnimatedRoutes from "./Routes"; // This should match your routes.jsx file
+import ReturnToTopButton from "./Components/Partials/ReturnToTopButton";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+
+const App = () => (
+ <Router>
+      <ScrollToTop />
+      <Header />
+      <main>
+        <AnimatedRoutes />
+              <ReturnToTopButton />
+
+      </main>
+      <Footer />
+    </Router>
+);
 
 export default App;
