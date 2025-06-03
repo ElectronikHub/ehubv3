@@ -53,7 +53,7 @@ const Header = () => {
           </span>
         </a>
         {/* Desktop Navbar */}
-        <div className="hidden md:block">
+        <div className="hidden md:block bg-primary bg-opacity-95 backdrop-blur-sm p-2 rounded-lg">
           <Navbar />
         </div>
         {/* Hamburger Icon for Mobile */}
