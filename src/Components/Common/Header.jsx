@@ -34,7 +34,7 @@ const Header = () => {
       <div className="container mx-auto flex items-center justify-between py-3 px-4 md:px-6 relative">
         <a href="/" className="flex items-center space-x-4">
           <img src={logoPath} alt="EHUB LOGO" className="w-16 md:w-20" />
-          <span className="archivo-black-regular text-xl md:text-2xl text-tertiary leading-tight">
+          <span className="archivo-black-regular text-xl md:text-2xl text-tertiary leading-tight uppercase">
             Electronik 
             <span className="text-secondary">Hub</span>
           </span>

@@ -9,7 +9,7 @@ function ArduinoSection() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
         <div className="relative w-full h-64 sm:h-80 md:h-96 group shadow-2xl rounded-2xl overflow-hidden">
           <img
-            src="/assets/images/arduino.new.png"
+            src="/assets/arduino.new.png"
             alt="Electronic prototype circuit board"
             className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-20"
           />
@@ -21,7 +21,7 @@ function ArduinoSection() {
         </div>
         <div className="relative w-full h-64 sm:h-80 md:h-96 group shadow-2xl rounded-2xl overflow-hidden">
           <img
-            src="/assets/images/rasp.png"
+            src="/assets/rasp.png"
             alt="Arduino board with components"
             className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-20"
           />

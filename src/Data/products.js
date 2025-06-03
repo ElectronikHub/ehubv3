@@ -1,7 +1,21 @@
 const products = [
-  { id: 1, name: "Arduino Uno", description: "Microcontroller board", price: 25 },
-  { id: 2, name: "Raspberry Pi 4", description: "Single-board computer", price: 55 },
-  { id: 3, name: "AI Starter Kit", description: "Everything you need to begin AI projects", price: 100 },
+  {
+    id: 1,
+    name: "Smart Desk Lamp",
+    image: "/assets/products/lamp.jpg",
+    description: "A modern desk lamp with smart controls and adjustable brightness.",
+    price: 49.99,
+    tags: ["Smart", "Lighting", "Home"],
+  },
+  {
+    id: 2,
+    name: "Bluetooth Speaker",
+    image: "/assets/products/speaker.jpg",
+    description: "Portable Bluetooth speaker with rich sound and long battery life.",
+    price: 29.99,
+    tags: ["Audio", "Portable"],
+  },
+  // ... more products
 ];
 
 export default products;

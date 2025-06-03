@@ -36,3 +36,12 @@ code {
   font-weight: 800;
   font-style: normal;
 }
+
+
+/* In your CSS or Tailwind config */
+.scroll-snap-y {
+  scroll-snap-type: y mandatory;
+}
+.scroll-snap-start {
+  scroll-snap-align: start;
+}

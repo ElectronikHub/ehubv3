@@ -84,17 +84,28 @@ function HeroSection() {
         </p>
         <p>&nbsp;</p>
         <div className='bg-secondary w-full flex justify-center items-center h-14'>
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => {
-              document.getElementById('it-section')?.scrollIntoView({ behavior: 'smooth' });
-            }}
-            className="border-secondary bg-secondary w-24 h-24 rounded-full flex justify-start items-end text-white font-bold text-xl hover:bg-[#d1741f] transition translate-x-0 translate-y-0"
-            aria-label="Scroll down to About section"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" height="112px" viewBox="0 -960 960 960" width="auto" fill="#e3e3e3"><path d="m296-224-56-56 240-240 240 240-56 56-184-183-184 183Zm0-240-56-56 240-240 240 240-56 56-184-183-184 183Z"/></svg>
-          </motion.button>
+    <motion.div
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.97 }}
+      onClick={() => {
+        document.getElementById('it-section')?.scrollIntoView({ behavior: 'smooth' });
+      }}
+      className="bg-secondary w-full flex justify-center items-center h-14 cursor-pointer select-none"
+      aria-label="Scroll down to About section"
+      tabIndex={0}
+      onKeyPress={e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          document.getElementById('it-section')?.scrollIntoView({ behavior: 'smooth' });
+        }
+      }}
+      role="button"
+    >
+      <div className="border-secondary bg-secondary w-24 h-24 rounded-full flex justify-center items-center text-white font-bold text-xl hover:bg-[#d1741f] transition">
+        <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 -960 960 960" width="48" fill="#e3e3e3">
+          <path d="m296-224-56-56 240-240 240 240-56 56-184-183-184 183Zm0-240-56-56 240-240 240 240-56 56-184-183-184 183Z"/>
+        </svg>
+      </div>
+    </motion.div>
         </div>
       </motion.div>
     </section>

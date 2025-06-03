@@ -25,7 +25,7 @@ function AboutSection() {
         whileHover={{ scale: 1.1 }}
       />
       <p className="text-black montserrat-regular mt-4 text-center max-w-xl sm:max-w-2xl px-2 sm:px-0 text-md sm:text-base md:text-3xl">
-        At <span className="archivo-black-regular text-primary">Electronik <span className="archivo-black-regular text-secondary">Hub</span></span>, we're passionate about turning your tech ideas into reality.
+        At <span className="archivo-black-regular text-primary uppercase">Electronik <span className="archivo-black-regular text-secondary">Hub</span></span>, we're passionate about turning your tech ideas into reality.
       </p>
       <p className="text-black montserrat-regular mt-4 text-center max-w-xl sm:max-w-2xl px-2 sm:px-0 text-sm sm:text-xl md:text-lg">
         Our expertise spans across various cutting-edge technologies, including Arduino, Raspberry Pi, AI, web development, and much more.

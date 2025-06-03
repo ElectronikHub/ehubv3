@@ -33,8 +33,10 @@ function StoreSection() {
         }}
       >
         <h3 className="archivo-black-regular text-center text-xl mb-2">
-          At <span className="text-primary">Electronik</span>
-          <span className="text-secondary">Hub</span>, we're more than just a tech support company.
+          At <span className="uppercase">
+            <span className="text-primary">Electronik</span>
+            <span className="text-secondary">Hub</span>
+          </span>, we're more than just a tech support company.
         </h3>
         <p className="text-center mb-4">
           We're your partners in innovation, dedicated to helping you succeed. Let’s build the future together.

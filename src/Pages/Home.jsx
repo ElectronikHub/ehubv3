@@ -7,13 +7,14 @@ import ProjectsSection from "../Components/Home/ProjectsSection";
 
 function Home() {
   return (
-    <div className="w-full min-h-screen flex flex-col items-end justify-end">
-      <HeroSection />
-      <AboutSection />
-      <ServicesSection />
-      <StoreSection />
-      <ProjectsSection />
-    </div>
+<div>
+  <section><HeroSection /></section>
+  <section><AboutSection /></section>
+  <section><ServicesSection /></section>
+  <section><StoreSection /></section>
+  <section><ProjectsSection /></section>
+</div>
+
   );
 }
 
