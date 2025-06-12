@@ -17,13 +17,13 @@ const Navbar = ({ mobile = false, onClickLink }) => (
     {navLinks.map((link) => (
       <li
         key={link.to}
-        className="w-full border-b border-transparent hover:border-secondary transition-colors duration-300 uppercase"
+        className="w-full border-b border-transparent hover:border-secondary transition-colors duration-300 uppercase font-archivo"
       >
         <NavLink
           to={link.to}
           onClick={onClickLink}
           className={({ isActive }) =>
-            `block w-full px-3 py-2 rounded-md font-semibold transition transform ${isActive
+            `block w-full px-3 py-2 rounded-md archivo-black-regular transition transform ${isActive
               ? "text-secondary border-b-2 border-secondary scale-105"
               : "text-tertiary hover:text-secondary hover:scale-105"
             }`
