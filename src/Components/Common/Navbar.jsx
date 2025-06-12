@@ -6,14 +6,13 @@ const navLinks = [
   { to: "/services", label: "Services" },
   { to: "/products", label: "Products" },
   { to: "/about", label: "About" },
-  { to: "/contact", label: "Contact" },
+  // { to: "/contact", label: "Contact" },
 ];
 
 const Navbar = ({ mobile = false, onClickLink }) => (
   <ul
-    className={`flex ${
-      mobile ? "flex-col gap-8 text-2xl" : "gap-10 text-base"
-    }`}
+    className={`flex ${mobile ? "flex-col gap-8 text-2xl" : "gap-10 text-base"
+      }`}
   >
     {navLinks.map((link) => (
       <li
@@ -24,10 +23,9 @@ const Navbar = ({ mobile = false, onClickLink }) => (
           to={link.to}
           onClick={onClickLink}
           className={({ isActive }) =>
-            `block w-full px-3 py-2 rounded-md font-semibold transition transform ${
-              isActive
-                ? "text-secondary border-b-2 border-secondary scale-105"
-                : "text-tertiary hover:text-secondary hover:scale-105"
+            `block w-full px-3 py-2 rounded-md font-semibold transition transform ${isActive
+              ? "text-secondary border-b-2 border-secondary scale-105"
+              : "text-tertiary hover:text-secondary hover:scale-105"
             }`
           }
           tabIndex={0}
