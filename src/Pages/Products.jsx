@@ -1,6 +1,6 @@
 import React from "react";
-import ProductList from "../Components/Products/ProductList";
-import products from "../Data/products";
+// import ProductList from "../Components/Products/ProductList";
+// import products from "../Data/products";
 import { motion } from "framer-motion";
 
 const Products = () => (
@@ -8,7 +8,7 @@ const Products = () => (
     {/* <h2 className="text-2xl font-bold mb-4">Products</h2>
     <ProductList products={products} /> */}
 
-        <div className="h-screen inset-0 z-50 flex flex-col items-center justify-center bg-primary bg-opacity-95">
+    <div className="h-screen inset-0 z-50 flex flex-col items-center justify-center bg-primary bg-opacity-95">
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
