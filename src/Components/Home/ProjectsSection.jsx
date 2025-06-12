@@ -5,9 +5,9 @@ import Button from "../Partials/Button2";
 import ProjectCard from "../Partials/ProjectCard";
 
 // Sample images (replace with your actual paths)
-const proj1 = "/assets/logo.png";
-const proj2 = "/assets/logo.png";
-const proj3 = "/assets/logo.png";
+const proj1 = "/Assets/logo.png";
+const proj2 = "/Assets/logo.png";
+const proj3 = "/Assets/logo.png";
 
 const projects = [
   {

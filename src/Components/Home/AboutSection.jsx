@@ -30,16 +30,16 @@ function AboutSection() {
       <p className="text-black montserrat-regular mt-4 text-center max-w-xl sm:max-w-2xl px-2 sm:px-0 text-sm sm:text-xl md:text-lg">
         Our expertise spans across various cutting-edge technologies, including Arduino, Raspberry Pi, AI, web development, and much more.
       </p>
-      <motion.img/>
-        <KeyPoints />
+      <motion.img />
+      <KeyPoints />
 
 
-              <div className="h-10">
-                <Button onClick={() => alert("Clicked!")}>
-                        Inquire Now
-                      </Button>
-              </div>
-      
+      <div className="h-10">
+        <Button onClick={() => alert("Clicked!")}>
+          Inquire Now
+        </Button>
+      </div>
+
     </motion.section>
   );
 }

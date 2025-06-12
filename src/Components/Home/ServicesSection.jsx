@@ -21,8 +21,8 @@ const staggerContainer = {
 const services = [
   {
     icons: [
-      { src: "/assets/Arduino.png", alt: "Arduino Icon" },
-      { src: "/assets/Raspberry.png", alt: "Raspberry Pi Icon" },
+      { src: "/Assets/Arduino.png", alt: "Arduino Icon" },
+      { src: "/Assets/Raspberry.png", alt: "Raspberry Pi Icon" },
     ],
     title: "Arduino/Raspberry Pi Projects",
     description:
@@ -30,14 +30,14 @@ const services = [
     link: "/services#arduino-section",
   },
   {
-    icons: [{ src: "/assets/Creality.png", alt: "Creality Icon" }],
+    icons: [{ src: "/Assets/Creality.png", alt: "Creality Icon" }],
     title: "3D Design/Printing",
     description:
       "Unlock the potential of 3D design and printing with our expert guidance. From prototyping to production, we help you bring your innovative ideas to life.",
     link: "/services#section-design",
   },
   {
-    icons: [{ src: "/assets/Web Dev.png", alt: "Web Dev Icon" }],
+    icons: [{ src: "/Assets/Web Dev.png", alt: "Web Dev Icon" }],
     title: "Web Development",
     description:
       "Build robust, scalable, and user-friendly web applications with our expert team. From e-commerce sites to custom solutions, we craft digital experiences that drive results.",
@@ -92,7 +92,7 @@ function ServicesSection() {
                 <Button>
                   Learn More
                 </Button>
-                
+
               </Link>
             </motion.div>
           ))}
