@@ -53,7 +53,7 @@ jobs:
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./build/         # Change to ./dist/ if your build output folder is different
-        server-dir: /public_html/   # Change if your cPanel root is different
+        server-dir: ./   # Change if your cPanel root is different
         exclude: |
           **/.git*
           **/.git*/**
