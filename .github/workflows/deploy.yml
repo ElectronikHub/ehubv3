@@ -1,0 +1,40 @@
+name: Deploy to cPanel via FTP
+
+on:
+  push:
+    branches: [ main ]  # Or your deployment branch
+
+jobs:
+  web-deploy:
+    name: Deploy Website
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build project
+      run: npm run build
+
+    - name: Deploy via FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.0
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./build/         # Or ./dist/ if using Vite
+        server-dir: ./   # Change if your cPanel root is different
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          .env
