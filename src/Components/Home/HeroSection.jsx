@@ -1,9 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
 
-const fadeInUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.8 } },
-};
 
 function HeroSection() {
   const videoRef = useRef(null);
