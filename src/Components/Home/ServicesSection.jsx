@@ -21,8 +21,8 @@ const staggerContainer = {
 const services = [
   {
     icons: [
-      { src: "/Assets/Arduino.png", alt: "Arduino Icon" },
-      { src: "/Assets/Raspberry.png", alt: "Raspberry Pi Icon" },
+      { src: "./Assets/Arduino.png", alt: "Arduino Icon" },
+      { src: "./Assets/Raspberry.png", alt: "Raspberry Pi Icon" },
     ],
     title: "Arduino/Raspberry Pi Projects",
     description:
