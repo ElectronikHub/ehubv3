@@ -2,22 +2,43 @@ name: Deploy to cPanel via FTP
 
 on:
   push:
-    branches: [ main ]  # Or your deployment branch
+    branches: [ main ]  # Change if you deploy from a different branch
 
 jobs:
-  web-deploy:
-    name: Deploy Website
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
 
+    - name: Check FTP Secrets Presence
+      run: |
+        if [ -z "${{ secrets.FTP_SERVER }}" ]; then
+          echo "Error: FTP_SERVER secret is missing!"
+          exit 1
+        else
+          echo "FTP_SERVER secret is set."
+        fi
+
+        if [ -z "${{ secrets.FTP_USERNAME }}" ]; then
+          echo "Error: FTP_USERNAME secret is missing!"
+          exit 1
+        else
+          echo "FTP_USERNAME secret is set."
+        fi
+
+        if [ -z "${{ secrets.FTP_PASSWORD }}" ]; then
+          echo "Error: FTP_PASSWORD secret is missing!"
+          exit 1
+        else
+          echo "FTP_PASSWORD secret is set."
+        fi
+
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
         node-version: '18'
-        cache: 'npm'
 
     - name: Install dependencies
       run: npm ci
@@ -31,8 +52,8 @@ jobs:
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./build/         # Or ./dist/ if using Vite
-        server-dir: /public_html/  # Change if your cPanel root is different
+        local-dir: ./build/         # Change to ./dist/ if your build output folder is different
+        server-dir: /public_html/   # Change if your cPanel root is different
         exclude: |
           **/.git*
           **/.git*/**
