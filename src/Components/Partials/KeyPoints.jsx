@@ -17,7 +17,7 @@ const keyPoints = [
 
 const KeyPoints = () => (
   <div className="w-full flex justify-center items-center bg-white py-8">
-    <div className="flex flex-col md:flex-row items-center justify-center max-w-3xl h-64 w-full">
+    <div className="flex flex-col md:flex-row items-center justify-center max-w-3xl h-64 w-full  cursor-default">
       {keyPoints.map((point, idx) => (
         <React.Fragment key={point.title}>
           {/* Circle */}

@@ -95,7 +95,7 @@ function HeroSection() {
             }}
             role="button"
           >
-            <div className="border-black drop-shadow-2xl bg-secondary w-16 h-16 sm:w-24 sm:h-24 rounded-full flex justify-center items-center text-white font-bold">
+            <div className="border-black drop-shadow-2xl bg-secondary w-16 h-16 sm:w-16 sm:h-16 rounded-full flex justify-center items-center text-white font-bold">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 100 100"
@@ -109,21 +109,14 @@ function HeroSection() {
                     transformOrigin: '50% 50%',
                     animation: 'bounce 3s infinite',
                   }}
+
+                  className="path"
                   stroke="#E1862D"
                   strokeWidth="8"
                   d="M40 65 L50 45 L60 65"
                 />
               </svg>
-
-
-
-
-
-
-
-
             </div>
-
           </div>
         </div>
       </div>

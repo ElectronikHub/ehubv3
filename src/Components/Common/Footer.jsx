@@ -3,8 +3,8 @@ import React from "react";
 const Footer = () => (
   <footer className="bg-primary text-tertiary py-8 ">
     <div className="container flex flex-col md:flex-row items-center justify-between gap-6 px-4 border-t border-secondary w-11/12 mx-auto">
-      <div className="mt-7 w-full flex flex-col md:flex-row items-center justify-between gap-6"> 
-        <div className="flex items-center gap-4">
+      <div className="mt-7 w-full flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="flex items-center gap-4 uppercase">
           <img src="/Assets/Logo.png" alt="EHUB LOGO" className="w-12" />
           <span className="archivo-black-regular text-lg">
             Electronik <span className="text-secondary">Hub</span>

@@ -35,8 +35,8 @@ function AboutSection() {
 
 
       <div className="h-10">
-        <Button onClick={() => alert("Clicked!")}>
-          Inquire Now
+        <Button>
+          <a href="https://www.facebook.com/OfficialElectronikHUB" target="_blank" rel="noreferrer">Inquire Now</a>
         </Button>
       </div>
 
