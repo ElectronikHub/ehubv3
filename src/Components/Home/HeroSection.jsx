@@ -1,5 +1,4 @@
 import React, { useRef, useState, useEffect } from "react";
-import { motion, secondsToMilliseconds } from "framer-motion";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
