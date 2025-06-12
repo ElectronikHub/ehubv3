@@ -30,6 +30,7 @@ code {
   font-weight: 100;
   font-style: normal;
 }
+
 .montserrat2-regular {
   font-family: "Montserrat", sans-serif;
   font-optical-sizing: auto;
@@ -38,10 +39,23 @@ code {
 }
 
 
-/* In your CSS or Tailwind config */
-.scroll-snap-y {
-  scroll-snap-type: y mandatory;
+
+
+@keyframes bounce {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+    /* smaller bounce */
+  }
 }
-.scroll-snap-start {
-  scroll-snap-align: start;
+
+path {
+  animation-name: bounce;
+  animation-duration: 3s;
+  animation-iteration-count: infinite;
 }

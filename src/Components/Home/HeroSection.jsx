@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, secondsToMilliseconds } from "framer-motion";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
@@ -58,7 +58,7 @@ function HeroSection() {
       {/* Mute/Unmute Button */}
       <button
         onClick={handleToggleMute}
-        className="absolute bottom-10 right-4 sm:bottom-10 sm:right-10 z-30 bg-tertiary bg-opacity-40 hover:bg-opacity-90 rounded-full p-3 shadow-lg transition flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-tertiary"
+        className="absolute bottom-20 right-5 sm:bottom-20 sm:right-20 z-30 bg-tertiary bg-opacity-15  hover:bg-opacity-90 rounded-full p-3 shadow-lg transition flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-tertiary"
         aria-label={muted ? "Unmute video" : "Mute video"}
         tabIndex={0}
       >
@@ -77,12 +77,7 @@ function HeroSection() {
       </button>
 
       {/* Overlay Content */}
-      <motion.div
-        className="relative w-full z-20 flex flex-col justify-center items-center"
-        initial="hidden"
-        animate="visible"
-        variants={fadeInUp}
-      >
+      <div className="relative w-full z-20 flex flex-col justify-center items-center">
         <h1 className="archivo-black-regular text-center text-3xl sm:text-4xl md:text-5xl font-bold text-tertiary drop-shadow-lg">
           Creating a Culture of <br />
           <span className="text-quaternary">Technological Innovation</span>
@@ -90,14 +85,12 @@ function HeroSection() {
         <p className="text-base sm:text-lg mt-4 mb-8 montserrat-regular text-[#C7C7C7] drop-shadow">
           Innovate, Connect, and Inspire!
         </p>
-        <div className='bg-secondary w-full flex justify-center items-center h-14 '>
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.97 }}
+        <div className="bg-secondary w-full flex justify-center items-center h-14">
+          <div
             onClick={() => {
               document.getElementById('it-section')?.scrollIntoView({ behavior: 'smooth' });
             }}
-            className="bg-secondary w-full flex justify-center items-center h-14 cursor-pointer select-none hover:bg-[#d1741f] transition"
+            className="bg-secondary w-full flex justify-center items-start h-14 cursor-pointer select-none hover:bg-[#d1741f] transition"
             aria-label="Scroll down to About section"
             tabIndex={0}
             onKeyPress={e => {
@@ -107,14 +100,39 @@ function HeroSection() {
             }}
             role="button"
           >
-            <div className="border-black drop-shadow-2xl bg-secondary w-16 h-16 sm:w-24 sm:h-24 rounded-full flex justify-center items-start text-white font-bold text-xl">
-              <svg xmlns="http://www.w3.org/2000/svg" height="300" width="300" fill="#ffffff" viewBox="0 0 960 960 " >
-                <path d="m296-224-56-56 240-240 240 240-56 56-184-183-184 183Zm0-240-56-56 240-240 240 240-56 56-184-183-184 183Z" />
+            <div className="border-black drop-shadow-2xl bg-secondary w-16 h-16 sm:w-24 sm:h-24 rounded-full flex justify-center items-center text-white font-bold">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 100 100"
+                className="w-16 h-16 fill-none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="50" cy="50" r="40" strokeWidth="4" fill="#ffffff" />
+                <path
+                  style={{
+                    transformOrigin: '50% 50%',
+                    animation: 'bounce 3s infinite',
+                  }}
+                  stroke="#E1862D"
+                  strokeWidth="8"
+                  d="M40 65 L50 45 L60 65"
+                />
               </svg>
+
+
+
+
+
+
+
+
             </div>
-          </motion.div>
+
+          </div>
         </div>
-      </motion.div>
+      </div>
+
     </section>
 
   );
