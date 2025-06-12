@@ -2,7 +2,7 @@ import React from "react";
 
 const team = [
   { name: "Donne Joshua E. Arcilla", position: "CEO", desc: "Ehub Engineering Team Department" },
-  { name: "Prince Ralph Emanuel T. Ramirez", position: "COO|CFO", desc: "TEhub Engineering Team Department" },
+  { name: "Prince Ralph Emanuel T. Ramirez", position: "COO|CFO", desc: "Ehub Engineering Team Department" },
   // { name: "Emily Rodriguez", position: "COO", desc: "Operations and execution expert." },
 
 ];
