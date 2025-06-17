@@ -2,7 +2,7 @@ import React from "react";
 
 function ArduinoSection() {
   return (
-    <div id="arduino-section" className="py-20 bg-primary text-center">
+    <div id="a" className="py-20 bg-primary text-center">
       <h2 className="archivo-black-regular text-3xl sm:text-4xl lg:text-5xl text-tertiary mb-12">
         ARDUINO/RASPBERRY PI <br /> PROJECTS
       </h2>
