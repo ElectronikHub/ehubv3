@@ -2,7 +2,7 @@ import React from "react";
 
 function ServiceCard({ service }) {
   return (
- <div className="min-h-screen bg-gray-100 flex flex-col lg:flex-row">
+ <div id="design-prototyping-section" className="min-h-screen bg-gray-100 flex flex-col lg:flex-row">
         {/* Left Section (Blue Box with Text) */}
         <div className="bg-[#103054] text-white p-8 sm:p-12 lg:p-16 flex-1 flex flex-col justify-center items-center lg:items-start text-center lg:text-left relative overflow-hidden">
           {/* Decorative circle (simplified for responsiveness, or use a background image) */}

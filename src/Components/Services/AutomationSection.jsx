@@ -2,7 +2,7 @@ import React from "react";
 
 function ServiceCard({ service }) {
   return (
-      <div className="bg-white py-20 px-4 sm:px-6 lg:px-8 min-h-screen flex items-center">
+      <div id="automation-security-section" className="bg-white py-20 px-4 sm:px-6 lg:px-8 min-h-screen flex items-center">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="flex justify-center lg:justify-start">
             <img

@@ -2,7 +2,7 @@ import React from "react";
 
 function ServiceCard({ service }) {
     return (
-        <div className="min-h-screen flex items-center justify-center bg-white px-6 py-12">
+        <div id="blockchain-cryptocurrency-section" className="min-h-screen flex items-center justify-center bg-white px-6 py-12">
             <section className="flex flex-col md:flex-row items-center justify-between max-w-6xl w-full gap-12">
 
                 {/* Text Content */}
