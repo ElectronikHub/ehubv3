@@ -2,7 +2,7 @@ import React from "react";
 
 function ServiceCard({ service }) {
   return (
-      <div
+      <div id="robotics-section"
         className="w-full min-h-screen bg-cover bg-center bg-no-repeat relative flex items-center justify-center text-center"
         style={{ backgroundImage: "url('/Assets/robotics.png')" }}
       >

@@ -2,7 +2,7 @@ import React from "react";
 
 function ServiceCard({ service }) {
   return (
-     <div className="bg-white py-20">
+     <div id="web-dev-section" className="bg-white py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl sm:text-5xl lg:text-6xl archivo-black-regular text-primary font-bold leading-tight">
             Professional Web Development Service

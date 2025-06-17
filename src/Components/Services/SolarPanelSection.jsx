@@ -2,7 +2,7 @@ import React from "react";
 
 function ServiceCard({ service }) {
     return (
-        <div className="relative w-screen h-screen flex overflow-hidden bg-primary">
+        <div id="solar-panel-system-section" className="relative w-screen h-screen flex overflow-hidden bg-primary">
             {/* Left: Image */}
             <div className="flex-1 h-full">
                 <img

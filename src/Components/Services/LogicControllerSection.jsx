@@ -2,7 +2,7 @@ import React from "react";
 
 function ServiceCard({ service }) {
   return (
-      <div className="min-h-screen bg-primary relative flex flex-col lg:flex-row items-center">
+      <div id="logic-controller-section" className="min-h-screen bg-primary relative flex flex-col lg:flex-row items-center">
         {" "}
         {/* Changed lg:flex-row-reverse to lg:flex-row */}
         {/* Text Content - now on the left */}

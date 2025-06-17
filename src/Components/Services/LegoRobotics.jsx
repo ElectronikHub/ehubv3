@@ -2,7 +2,7 @@ import React from "react";
 
 function ServiceCard({ service }) {
     return (
-        <div className="flex flex-col md:flex-row h-screen bg-primary">
+        <div id="lego-robotics-section" className="flex flex-col md:flex-row h-screen bg-primary">
             {/* Left: Image */}
             <div className="md:w-1/2 w-full h-64 md:h-full relative">
                 <img

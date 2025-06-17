@@ -2,7 +2,7 @@ import React from "react";
 
 function ServiceCard({ service }) {
     return (
-        <div className="relative min-h-screen bg-primary">
+        <div id="trainings-seminars-section" className="relative min-h-screen bg-primary">
             <div
                 className="absolute inset-0 bg-left bg-no-repeat bg-ao "
                 style={{

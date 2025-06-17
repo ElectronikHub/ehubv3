@@ -2,7 +2,7 @@ import React from "react";
 
 function ServiceCard({ service }) {
     return (
-        <div className="bg-tertiary">
+        <div id="artificial-intelligence-section" className="bg-tertiary">
             <div className="w-screen h-8 bg-secondary" />
             <div className="min-h-screen flex items-center justify-center px-6">
                 <div className="flex flex-col md:flex-row items-center justify-between max-w-6xl w-full gap-12">

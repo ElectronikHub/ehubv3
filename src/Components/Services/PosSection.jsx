@@ -3,6 +3,7 @@ import React from "react";
 function ServiceCard({ service }) {
     return (
         <div
+            id="point-of-sale-section"
             className="w-full h-screen bg-cover bg-center relative"
             style={{ backgroundImage: "url('/Assets/pos.png')" }}
         >
