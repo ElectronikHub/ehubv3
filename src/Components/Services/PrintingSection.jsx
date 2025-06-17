@@ -2,7 +2,7 @@ import React from "react";
 
 function PrintingSection() {
   return (
-    <div className="bg-gradient-to-b from-primary to-gray-200 py-20 min-h-screen flex items-center justify-center">
+    <div id="design-section" className="bg-gradient-to-b from-primary to-gray-200 py-20 min-h-screen flex items-center justify-center">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         <div id="section-design" className="text-center lg:text-left">
           <p className="montserrat2-regular text-4xl sm:text-5xl lg:text-6xl text-tertiary leading-tight mb-6">
@@ -29,7 +29,7 @@ function PrintingSection() {
     "
   >
     <img
-      src="/assets/echo.png"
+      src="/Assets/echo.png"
       alt="3D printer in action"
       className="absolute inset-0 w-full h-full object-cover rounded-2xl"
     />

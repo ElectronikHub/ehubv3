@@ -5,13 +5,15 @@ const services = [
     icons: ["./Assets/Arduino.png", "./Assets/Raspberry.png"],
     description:
       "From simple circuits to complex systems, we help you make the most of this versatile platform.",
-  },
+    buttonid: "arduino-section", 
+    },
   {
     id: 2,
     title: "3D Design/Printing",
     icons: ["./Assets/Creality.png"],
     description:
       "Unlock the potential of 3D design and printing with our expert guidance. From prototyping to production, we help you bring your innovative ideas to life.",
+    buttonid: "design-section",
   },
   {
     id: 3,
@@ -19,6 +21,7 @@ const services = [
     icons: ["./Assets/Web Dev.png"],
     description:
       "Build robust, scalable, and user-friendly web applications with our expert team.",
+    buttonid: "web-dev-section",
   },
   {
     id: 4,

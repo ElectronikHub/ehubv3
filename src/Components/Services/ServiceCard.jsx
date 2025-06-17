@@ -24,14 +24,14 @@ function ServiceCard({ service }) {
       <p className="text-xs md:text-sm montserrat-regular text-tertiary flex-grow">
         {service.description}
       </p>
-      <a href="#a">
-        <button
-          className="archivo-black-regular mt-6 bg-secondary text-tertiary text-xs md:text-sm px-4 py-2 rounded-full hover:bg-[#d1741f] transition duration-300 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2"
-          tabIndex={0}
-        >
-          Learn More
-        </button>
-      </a>
+      <a href={`#${service.buttonid}`}>
+  <button
+    className="archivo-black-regular mt-6 bg-secondary text-tertiary text-xs md:text-sm px-4 py-2 rounded-full hover:bg-[#d1741f] transition duration-300 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2"
+    tabIndex={0}
+  >
+    Learn More
+  </button>
+</a>
     </div>
   );
 }

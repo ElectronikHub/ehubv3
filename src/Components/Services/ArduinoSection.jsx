@@ -2,14 +2,14 @@ import React from "react";
 
 function ArduinoSection() {
   return (
-    <div id="a" className="py-20 bg-primary text-center">
+    <div id="arduino-section" className="py-20 bg-primary text-center">
       <h2 className="archivo-black-regular text-3xl sm:text-4xl lg:text-5xl text-tertiary mb-12">
         ARDUINO/RASPBERRY PI <br /> PROJECTS
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
         <div className="relative w-full h-64 sm:h-80 md:h-96 group shadow-2xl rounded-2xl overflow-hidden">
           <img
-            src="/assets/arduino.new.png"
+            src="/Assets/arduino.new.png"
             alt="Electronic prototype circuit board"
             className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-20"
           />
@@ -21,7 +21,7 @@ function ArduinoSection() {
         </div>
         <div className="relative w-full h-64 sm:h-80 md:h-96 group shadow-2xl rounded-2xl overflow-hidden">
           <img
-            src="/assets/rasp.png"
+            src="/Assets/rasp.png"
             alt="Arduino board with components"
             className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-20"
           />

@@ -21,7 +21,7 @@ function ServiceCard({ service }) {
                     </div>
                     <div>
                         <img
-                            src='./Assets/crypto.png'
+                            src='./Assets/Crypto.png'
                             alt="Artificial Intelligence"
                             className="rounded-2xl shadow-lg w-full max-w-md"
                         />
