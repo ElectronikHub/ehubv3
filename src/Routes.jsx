@@ -5,6 +5,7 @@ import Services from "./Pages/Services";
 import Products from "./Pages/Products";
 import Blog from "./Pages/Blog";
 import About from "./Pages/About";
+import NotFound from "./Pages/NotFound"; // <-- Import NotFound here
 
 const AppRoutes = () => (
   <Routes>
@@ -13,6 +14,7 @@ const AppRoutes = () => (
     <Route path="/products" element={<Products />} />
     <Route path="/blog" element={<Blog />} />
     <Route path="/about" element={<About />} />
+    <Route path="*" element={<NotFound />} /> {/* Catch-all 404 route */}
   </Routes>
 );
 
