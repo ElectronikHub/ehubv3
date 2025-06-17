@@ -2,7 +2,7 @@ import React from "react";
 
 function ServiceCard({ service }) {
     return (
-        <div id="research-analytics-section" className="w-screen h-screen bg-[#103054] relative text-white font-montserrat">
+        <div id="research-paper-consultation-section" className="w-screen h-screen bg-[#103054] relative text-white font-montserrat">
             {/* Left Side with Image */}
             <div className="absolute top-0 left-0 w-full md:w-[46vw] h-screen bg-[#cccccc] overflow-hidden">
                 <img
