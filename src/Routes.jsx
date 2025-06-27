@@ -5,6 +5,8 @@ import Services from "./Pages/Services";
 import Products from "./Pages/Products";
 import Blog from "./Pages/Blog";
 import About from "./Pages/About";
+import CartPage from "./Pages/Cart";
+import Detail from "./Pages/Details"; // <-- Import Cart component if needed
 import NotFound from "./Pages/NotFound"; // <-- Import NotFound here
 
 const AppRoutes = () => (
@@ -15,6 +17,8 @@ const AppRoutes = () => (
     <Route path="/blog" element={<Blog />} />
     <Route path="/about" element={<About />} />
     <Route path="/" element={<NotFound />} /> {/* Catch-all 404 route */}
+    <Route path="/cart" element={<CartPage />} />
+    <Route path="/details/:id" element={<Detail />} />
   </Routes>
 );
 
