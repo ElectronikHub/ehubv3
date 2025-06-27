@@ -18,6 +18,7 @@ function ServiceCard({ service }) {
 
     return (
         <div
+        id = "point-of-sale-section"
             className="w-full h-screen relative overflow-hidden"
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
