@@ -1,24 +1,26 @@
 import React from "react";
-import AboutHeroSection from "../Components/About/AboutHeroSection";
-import WhoWeAreSection from "../Components/About/WhoWeAreSection";
-import MissionVisionSection from "../Components/About/MissionVisionSection";
-import CoreValuesSection from "../Components/About/CoreValuesSection";
-import TeamSection from "../Components/About/TeamSection";
+import Background from "../Components/About/Background";
+import IntroSection from "../Components/About/IntroSection";
+import InnovateSection from "../Components/About/InnovateSection";
+import MissionVision from "../Components/About/MissionVision";
+import CoreValues from "../Components/About/CoreValues";
 import TestimonialsSection from "../Components/About/TestimonialsSection";
-import CallToActionSection from "../Components/About/CallToActionSection";
+import MeetOurTeam from "../Components/About/MeetOurTeam";
 
-function About() {
+const About = () => {
   return (
-    <div className="w-full min-h-screen flex flex-col">
-      <AboutHeroSection />
-      <WhoWeAreSection />
-      <MissionVisionSection />
-      <CoreValuesSection />
-      <TeamSection />
-      <TestimonialsSection />
-      <CallToActionSection />
+    <div className="relative">
+      <div className="w-full px-4 py-10 pt-40">
+        <IntroSection />
+        <Background />
+        <InnovateSection />
+        <MissionVision />
+        <CoreValues />
+        <MeetOurTeam />
+        <TestimonialsSection />
+      </div>
     </div>
   );
-}
+};
 
 export default About;

@@ -38,8 +38,8 @@ const Footer = () => (
           </div>
         </div>
         <div className="flex gap-4">
-          <img src="/Assets/fbQR.png" alt="Footer Visual 1" className="w-20" />
-          <img src="/Assets/phoneQR.png" alt="Footer Visual 2" className="w-20" />
+          <img src="/Assets/fbQr.png" alt="Footer Visual 1" className="w-20" />
+          <img src="/Assets/phoneQr.png" alt="Footer Visual 2" className="w-20" />
         </div>
       </div>
     </div>

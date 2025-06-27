@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scroll-behavior: smooth;
+    scroll-padding-top: 70px; /* height of your fixed header */
+
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -59,3 +65,5 @@ code {
   animation-duration: 3s;
   animation-iteration-count: infinite;
 }
+
+
