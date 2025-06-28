@@ -11,29 +11,22 @@ function ProductDetails() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        const res = await axios.get(`http://localhost:8000/api/apiproducts/${id}`);
-        const productData = res.data;
+  const fetchProduct = async () => {
+    try {
+      const res = await axios.get(`http://localhost:8000/api/apiproducts/${id}`);
+      const productData = res.data;
 
-        setProduct(productData);
+      setProduct(productData);
+      setImages(Array.isArray(productData.images) ? productData.images : []);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching product:', error);
+      setLoading(false);
+    }
+  };
 
-        const parsedImages = Array.isArray(productData.image)
-          ? productData.image
-          : typeof productData.image === 'string' && productData.image.startsWith('[')
-            ? JSON.parse(productData.image)
-            : [productData.image]; // fallback if it's a single string
-
-        setImages(parsedImages);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching product:', error);
-        setLoading(false);
-      }
-    };
-
-    fetchProduct();
-  }, [id]);
+  fetchProduct();
+}, [id]);
 
   if (loading) return <div className="p-10 text-center">Loading...</div>;
   if (!product) return <div className="p-10 text-red-600">Product not found.</div>;
@@ -112,14 +105,14 @@ function ProductDetails() {
             {inStock && (
               <div className="flex items-center gap-4 mb-8">
                 <span>Quantity:</span>
-                <button onClick={decreaseQuantity}>−</button>
+                <button onClick={decreaseQuantity} className="bg-gray-200 px-2 rounded">−</button>
                 <input
                   type="number"
                   value={quantity}
                   onChange={handleQuantityChange}
-                  className="w-12 text-center"
+                  className="w-12 text-center border rounded"
                 />
-                <button onClick={increaseQuantity}>+</button>
+                <button onClick={increaseQuantity} className="bg-gray-200 px-2 rounded">+</button>
               </div>
             )}
 

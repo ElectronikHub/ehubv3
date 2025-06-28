@@ -72,6 +72,7 @@ const Products = () => {
             };
           } catch (imageError) {
             console.error(`Image fetch failed for product ${product.id}`, imageError);
+
             return { ...product, imageUrl: '/img/default.png' };
           }
         })
@@ -333,7 +334,7 @@ const Products = () => {
               name={product.name}
               price={product.price}
               description={product.description}
-              image={product.image}
+              image={product.images}
               isFavorite={favorites.includes(product.name)}
               toggleFavorite={() => toggleFavorite(product.name)}
               onAddToCart={() => {

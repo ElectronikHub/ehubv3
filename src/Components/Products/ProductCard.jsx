@@ -1,12 +1,43 @@
-
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
 function ProductCard({ name, price, id, image, isFavorite, toggleFavorite, onAddToCart, isOutOfStock }) {
+  const imageList = Array.isArray(image)
+    ? image
+    : typeof image === 'string'
+      ? image.split(',').map(img => img.trim())
+      : [];
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const intervalRef = useRef(null);
+
+  const startCycling = () => {
+    if (imageList.length <= 1) return;
+
+    intervalRef.current = setInterval(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % imageList.length);
+    }, 3000); // change image every 1 second
+  };
+
+  const stopCycling = () => {
+    clearInterval(intervalRef.current);
+    setCurrentIndex(0); // reset to first image
+  };
+
+  useEffect(() => {
+    return () => clearInterval(intervalRef.current); // cleanup on unmount
+  }, []);
+
+  const displayedImage = imageList[currentIndex] || '/placeholder.png';
+
   return (
-    <div className="flex flex-col bg-white border border-gray-200 rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 max-w-60 min-h-[340px] relative group">
+    <div
+      className="flex flex-col bg-white border border-gray-200 rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 max-w-60 min-h-[340px] relative group"
+      onMouseEnter={startCycling}
+      onMouseLeave={stopCycling}
+    >
       {/* Favorite Button */}
-         <button
+      <button
         onClick={(e) => {
           e.preventDefault();
           toggleFavorite();
@@ -36,12 +67,13 @@ function ProductCard({ name, price, id, image, isFavorite, toggleFavorite, onAdd
         {/* Product Image */}
         <div className="w-28 h-28 flex items-center justify-center rounded-lg bg-gray-50 border border-gray-100 mb-3 overflow-hidden">
           <img
-            src={image}
+            src={displayedImage}
             alt={name}
             className="object-contain w-full h-full transition-transform duration-300 group-hover:scale-105"
             loading="lazy"
           />
         </div>
+
         {/* Product Name */}
         <div className="w-full text-center">
           <span
@@ -51,6 +83,7 @@ function ProductCard({ name, price, id, image, isFavorite, toggleFavorite, onAdd
             {name}
           </span>
         </div>
+
         {/* Price */}
         <div className="w-full mt-2 text-center">
           <span className="text-lg font-bold text-primary">{price}</span>
@@ -60,7 +93,7 @@ function ProductCard({ name, price, id, image, isFavorite, toggleFavorite, onAdd
       {/* Add to Cart Button */}
       <div className="px-4 pb-4 mt-auto">
         <button
-          className={`w-full bg-primary text-white font-semibold py-2 rounded-lg shadow hover:bg-yellow-500 transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed`}
+          className="w-full bg-primary text-white font-semibold py-2 rounded-lg shadow hover:bg-yellow-500 transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
           onClick={(e) => {
             e.preventDefault();
             onAddToCart();
