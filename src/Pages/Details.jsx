@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
@@ -10,28 +10,28 @@ function ProductDetails() {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
 
+  const [showModal, setShowModal] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1.5);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
+  const [hasDragged, setHasDragged] = useState(false); // NEW
+
+  const imgRef = useRef(null);
+
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const res = await axios.get(`http://localhost:8000/api/apiproducts/${id}`);
         const productData = res.data;
-
         setProduct(productData);
-
-        const parsedImages = Array.isArray(productData.image)
-          ? productData.image
-          : typeof productData.image === 'string' && productData.image.startsWith('[')
-            ? JSON.parse(productData.image)
-            : [productData.image]; // fallback if it's a single string
-
-        setImages(parsedImages);
+        setImages(Array.isArray(productData.images) ? productData.images : []);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching product:', error);
         setLoading(false);
       }
     };
-
     fetchProduct();
   }, [id]);
 
@@ -66,6 +66,44 @@ function ProductDetails() {
     alert('Added to cart!');
   };
 
+  const openZoomModal = () => {
+    if (hasDragged) return; // PREVENT ZOOM IF DRAGGED
+
+    if (!showModal) {
+      setZoomLevel(1);
+      setPosition({ x: 0, y: 0 });
+      setShowModal(true);
+    } else {
+      setZoomLevel(prev => (prev >= 6 ? 2 : prev + 0.5));
+    }
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setZoomLevel(1.5);
+    setPosition({ x: 0, y: 0 });
+  };
+
+  const startDrag = (e) => {
+    setIsDragging(true);
+    setHasDragged(false); // RESET ON NEW DRAG
+    setStartPos({ x: e.clientX - position.x, y: e.clientY - position.y });
+  };
+
+  const duringDrag = (e) => {
+    if (isDragging) {
+      setHasDragged(true); // MARK AS DRAGGED
+      setPosition({
+        x: e.clientX - startPos.x,
+        y: e.clientY - startPos.y,
+      });
+    }
+  };
+
+  const endDrag = () => {
+    setIsDragging(false);
+  };
+
   return (
     <div className="min-h-screen bg-white py-24">
       <main className="max-w-7xl mx-auto px-4 py-10">
@@ -74,18 +112,26 @@ function ProductDetails() {
           <div className="flex flex-col items-center">
             {images.length > 0 ? (
               <>
-                <img
-                  src={images[currentImageIndex]}
-                  alt={`Product ${currentImageIndex + 1}`}
-                  className="w-full max-w-md object-contain rounded-lg shadow-lg"
-                />
+                <div className="relative w-full max-w-md overflow-hidden rounded-lg shadow-lg border border-gray-300">
+                  <img
+                    src={images[currentImageIndex]}
+                    alt={`Product ${currentImageIndex + 1}`}
+                    onClick={openZoomModal}
+                    className="w-full object-contain cursor-zoom-in"
+                  />
+                </div>
+
                 <div className="flex gap-3 mt-4">
                   {images.map((img, i) => (
                     <img
                       key={i}
                       src={img}
                       alt={`Thumbnail ${i + 1}`}
-                      onClick={() => setCurrentImageIndex(i)}
+                      onClick={() => {
+                        setCurrentImageIndex(i);
+                        setZoomLevel(1.5);
+                        setPosition({ x: 0, y: 0 });
+                      }}
                       className={`w-16 h-16 object-cover rounded cursor-pointer border ${
                         currentImageIndex === i ? 'border-blue-600' : 'border-gray-300'
                       }`}
@@ -112,14 +158,14 @@ function ProductDetails() {
             {inStock && (
               <div className="flex items-center gap-4 mb-8">
                 <span>Quantity:</span>
-                <button onClick={decreaseQuantity}>−</button>
+                <button onClick={decreaseQuantity} className="bg-gray-200 px-2 rounded">−</button>
                 <input
                   type="number"
                   value={quantity}
                   onChange={handleQuantityChange}
-                  className="w-12 text-center"
+                  className="w-12 text-center border rounded"
                 />
-                <button onClick={increaseQuantity}>+</button>
+                <button onClick={increaseQuantity} className="bg-gray-200 px-2 rounded">+</button>
               </div>
             )}
 
@@ -132,6 +178,45 @@ function ProductDetails() {
           </div>
         </div>
       </main>
+
+      {/* Modal for zoomed image */}
+      {showModal && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+          onMouseMove={duringDrag}
+          onMouseUp={endDrag}
+          onMouseLeave={endDrag}
+        >
+          <div className="absolute top-4 right-4">
+            <button
+              onClick={closeModal}
+              className="text-white text-xl bg-gray-800 rounded-full px-3 py-1"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="absolute bottom-4 text-center w-full text-white text-sm pointer-events-none">
+            Click and hold to drag image. Click again to zoom in.
+          </div>
+
+          <img
+            ref={imgRef}
+            src={images[currentImageIndex]}
+            alt="Zoomed Product"
+            onMouseDown={startDrag}
+            onClick={openZoomModal}
+            style={{
+              transform: `scale(${zoomLevel}) translate(${position.x / zoomLevel}px, ${position.y / zoomLevel}px)`,
+              cursor: isDragging ? 'grabbing' : 'zoom-in',
+              transition: isDragging ? 'none' : 'transform 0.3s ease',
+              transformOrigin: 'center',
+            }}
+            className="max-h-[90%] max-w-[90%] object-contain"
+            draggable={false}
+          />
+        </div>
+      )}
     </div>
   );
 }

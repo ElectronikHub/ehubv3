@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 function CartPage() {
   const [cartItems, setCartItems] = useState([]);
-  const [removeQuantities, setRemoveQuantities] = useState({}); // Track quantities to remove
+  const [removeQuantities, setRemoveQuantities] = useState({});
 
   useEffect(() => {
     const cartData = JSON.parse(localStorage.getItem('cart')) || [];
@@ -10,7 +10,7 @@ function CartPage() {
 
     const initialRemoveQuantities = {};
     cartData.forEach((item, index) => {
-      initialRemoveQuantities[index] = 1; // Start remove quantity at 1
+      initialRemoveQuantities[index] = 1;
     });
     setRemoveQuantities(initialRemoveQuantities);
   }, []);
@@ -39,7 +39,6 @@ function CartPage() {
     setCartItems(updatedCart);
     localStorage.setItem('cart', JSON.stringify(updatedCart));
 
-    // Reset remove quantity for this item or remove it if item removed
     const newRemoveQuantities = { ...removeQuantities };
     if (updatedCart[indexToRemove]) {
       newRemoveQuantities[indexToRemove] = 1;
@@ -49,6 +48,15 @@ function CartPage() {
     setRemoveQuantities(newRemoveQuantities);
   };
 
+  const handleBuyNow = () => {
+    if (cartItems.length === 0) {
+      alert("Your cart is empty.");
+      return;
+    }
+
+    alert("Proceeding to checkout..."); // Replace with real checkout logic or redirect
+  };
+
   const getSubtotal = () =>
     cartItems.reduce(
       (sum, item) => sum + parseFloat(item.price.replace('₱', '')) * item.quantity,
@@ -56,7 +64,7 @@ function CartPage() {
     );
 
   const subtotal = getSubtotal();
-  const taxRate = 0.10; // 10% tax
+  const taxRate = 0.10;
   const tax = subtotal * taxRate;
   const total = subtotal + tax;
 
@@ -78,7 +86,13 @@ function CartPage() {
                     className="flex items-center bg-white rounded-lg shadow overflow-hidden"
                   >
                     <img
-                      src={item.image}
+                      src={
+                        Array.isArray(item.images)
+                          ? item.images[0]
+                          : typeof item.images === 'string'
+                          ? item.images.split(',')[0]?.trim()
+                          : '/placeholder.png'
+                      }
                       alt={item.name}
                       className="w-32 h-32 object-cover rounded-l-lg"
                     />
@@ -89,7 +103,8 @@ function CartPage() {
                       </p>
                       <p className="text-gray-500 mt-1">Quantity: {item.quantity}</p>
                       <p className="font-bold mt-2 text-lg">
-                        Total: ₱{(parseFloat(item.price.replace('₱', '')) * item.quantity).toFixed(2)}
+                        Total: ₱
+                        {(parseFloat(item.price.replace('₱', '')) * item.quantity).toFixed(2)}
                       </p>
                     </div>
                     <div className="flex flex-col items-center justify-center gap-3 px-4">
@@ -107,12 +122,10 @@ function CartPage() {
                         value={removeQuantities[index] || 1}
                         onChange={(e) => handleRemoveQuantityChange(index, e)}
                         className="w-20 px-2 py-1 border rounded text-center"
-                        aria-label={`Quantity to remove for ${item.name}`}
                       />
                       <button
                         onClick={() => handleRemoveAmount(index)}
                         className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded transition"
-                        aria-label={`Remove selected quantity of ${item.name}`}
                       >
                         Remove
                       </button>
@@ -124,7 +137,7 @@ function CartPage() {
           </div>
 
           {/* Summary */}
-          <div className="w-full md:w-96 bg-white rounded-lg shadow p-6">
+          <div className="w-full md:w-96 bg-white rounded-lg shadow p-6 animate-fade-in">
             <h2 className="text-xl font-extrabold text-center mb-6 border-b pb-3">Summary</h2>
             <div className="space-y-4">
               <div className="flex justify-between text-gray-700">
@@ -140,6 +153,14 @@ function CartPage() {
                 <span className="text-green-600">₱{total.toFixed(2)}</span>
               </div>
             </div>
+
+            {/* Buy Now Button */}
+            <button
+              onClick={handleBuyNow}
+              className="w-full mt-6 py-3 px-6 bg-green-600 text-white font-bold rounded-lg shadow-lg hover:bg-green-700 transition duration-300 ease-in-out animate-fade-in"
+            >
+              Buy Now
+            </button>
           </div>
         </div>
       </div>

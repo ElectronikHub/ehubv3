@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../Data/axios";
 import { AnimatePresence, motion } from "framer-motion";
 
+
 const Products = () => {
   const navigate = useNavigate();
   const [allProducts, setAllProducts] = useState([]);
@@ -32,42 +33,53 @@ const Products = () => {
       return updated;
     });
   };
+   useEffect(() => {
+      const fetchCategories = async () => {
+        try {
+          const res = await api.get('http://localhost:8000/api/apicategories');
+          setCategoriesFromDB(res.data);
+        } catch (err) {
+          console.error('Failed to fetch categories:', err);
+        }
+      };
+      fetchCategories();
+    }, []);
 
-  // Fetch categories from backend
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const res = await api.get('http://localhost:8000/api/apicategories');
-        setCategoriesFromDB(res.data);
-      } catch (err) {
-        console.error('Failed to fetch categories:', err);
-      }
-    };
-    fetchCategories();
-  }, []);
+ useEffect(() => {
+  const fetchProducts = async () => {
+    try {
+      const res = await api.get('/',
+        { params: { sort: sortOption }}
+      ); 
+      const products = res.data;
+      console.log("Raw product sample:", products[0]);
+      const productsWithImages = await Promise.all(
+        products.map(async (product) => {
+          try {
+            const imageRes = await api.get(`/${product.id}/image`, { responseType: 'blob' });
+            const imageUrl = URL.createObjectURL(imageRes.data);
+            return {
+              ...product,
+              stock: Number(product.stock),
+              image: imageUrl
+            };
+          } catch (imageError) {
+            console.error('Image fetch failed for product ${product.id}', imageError);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await api.get('/', {
-          params: { sort: sortOption }
-        });
-        const products = res.data;
-        setAllProducts(
-          products.map(product => ({
-            ...product,
-            stock: Number(product.stock),
-            image: product.image || '/img/default.png'
-          }))
+            return { ...product, imageUrl: '/img/default.png' };
+          }
+        })
         );
+        setAllProducts(productsWithImages);
       } catch (err) {
         console.error('Failed to fetch products:', err);
       }
     };
-
     fetchProducts();
   }, [sortOption]);
-
+  // Fetch categories from backend
+ 
+  
   // Filtering and suggestions
   useEffect(() => {
     const normalizedType = selectedType.trim().toLowerCase();
@@ -310,7 +322,7 @@ const Products = () => {
                 name={product.name}
                 price={product.price}
                 description={product.description}
-                image={product.image}
+                images={product.images}
                 isFavorite={favorites.includes(product.name)}
                 toggleFavorite={() => toggleFavorite(product.name)}
                 onAddToCart={() => {
@@ -356,29 +368,42 @@ const Products = () => {
               >
                 ✖
               </button>
-              <div className="p-2 pt-2">
-                <h2 className="text-base sm:text-lg md:text-xl font-bold mb-4">
-                  Browse Categories
-                </h2>
-                {categoriesFromDB.length === 0 ? (
-                  <div className="text-xs text-gray-400">No categories found.</div>
-                ) : (
-                  categoriesFromDB.map((category) => (
-                    <button
-                      key={category.id}
-                      onClick={() => {
-                        setSelectedType(category.name);
-                        setShowSidebar(false);
-                      }}
-                      className={`block w-full text-left text-black hover:text-primary text-xs ${
-                        selectedType === category.name ? 'font-bold text-primary' : ''
-                      } pl-3 py-1 rounded transition-colors`}
-                    >
-                      {category.name}
-                    </button>
-                  ))
-                )}
-              </div>
+             <div className="p-2 pt-2">
+              <h2 className="text-base sm:text-lg md:text-xl font-bold mb-4">
+                Browse Categories
+              </h2>
+
+              <button
+                onClick={() => {
+                  setSelectedType('ALL');
+                  setShowSidebar(false);
+                }}
+                className={`block w-full text-left text-black hover:text-primary text-xs ${
+                  selectedType === 'ALL' ? 'font-bold text-primary' : ''
+                } pl-3 py-1 rounded transition-colors`}
+              >
+                All Categories
+              </button>
+
+              {categoriesFromDB.length > 0 ? (
+                categoriesFromDB.map((category) => (
+                  <button
+                    key={category.id}
+                    onClick={() => {
+                      setSelectedType(category.name);
+                      setShowSidebar(false);
+                    }}
+                    className={`block w-full text-left text-black hover:text-primary text-xs ${
+                      selectedType === category.name ? 'font-bold text-primary' : ''
+                    } pl-3 py-1 rounded transition-colors`}
+                  >
+                    {category.name}
+                  </button>
+                ))
+              ) : (
+                <div className="text-xs text-gray-400">No categories found.</div>
+              )}
+            </div>
             </motion.div>
           )}
         </AnimatePresence>
