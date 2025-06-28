@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
 import services from "../../Data/Services";
 import ServiceCard from "./ServiceCard";
-import { useLocation } from "react-router-dom";
 
 function ServicesHero() {
   const location = useLocation();
@@ -17,7 +18,7 @@ function ServicesHero() {
     }
   }, [location]);
 
-  // Responsive services per page
+  // Determine how many services to show based on screen width
   const getServicesPerPage = (width) => {
     if (width >= 1280) return 9;
     if (width >= 1024) return 6;
@@ -80,13 +81,26 @@ function ServicesHero() {
       {/* Content */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12 relative z-20">
         <div className="text-start max-w-2xl">
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl archivo-black-regular text-secondary font-bold leading-tight pt-16 drop-shadow-lg">
+          <motion.h2
+            className="text-4xl sm:text-5xl lg:text-6xl archivo-black-regular text-secondary font-bold leading-tight pt-16 drop-shadow-lg"
+            whileHover={{
+              textShadow: "0px 0px 12px rgba(255, 200, 100, 0.8)",
+              transition: {
+                repeat: Infinity,
+                repeatType: "reverse",
+                duration: 0.8,
+              },
+            }}
+          >
             Our Services
-          </h2>
+          </motion.h2>
           <p className="mt-8 md:mt-12 text-lg sm:text-xl lg:text-2xl montserrat-regular text-tertiary drop-shadow">
-            Offering innovative solutions in robotics, prototyping, programming, automation, security, biometrics, web development, solar systems, data analytics, POS, 3D printing, and thesis fabrication.
+            Offering innovative solutions in robotics, prototyping, programming, automation,
+            security, biometrics, web development, solar systems, data analytics, POS,
+            3D printing, and thesis fabrication.
           </p>
         </div>
+
         <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8 mt-16 md:mt-30">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 flex-grow">
             {visibleServices.map((service) => (
@@ -103,10 +117,14 @@ function ServicesHero() {
                   : "hover:bg-[#d1741f] transition duration-300"
               }`}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none"
-                viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                  d="M15 19l-7-7 7-7" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
               </svg>
             </button>
             <button
@@ -118,10 +136,14 @@ function ServicesHero() {
                   : "hover:bg-[#d1741f] transition duration-300"
               }`}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none"
-                viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                  d="M9 5l7 7-7 7" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
               </svg>
             </button>
           </div>
