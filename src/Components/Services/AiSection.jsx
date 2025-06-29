@@ -1,38 +1,73 @@
 import React from "react";
+import { motion } from "framer-motion";
 
 function ServiceCard({ service }) {
     return (
-        <div className="bg-tertiary">
+        <motion.div
+            id="artificial-intelligence-section"
+            className="bg-tertiary"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+        >
+            {/* Top Accent Bar */}
             <div className="w-screen h-8 bg-secondary" />
+
+            {/* Main Container */}
             <div className="min-h-screen flex items-center justify-center px-6">
                 <div className="flex flex-col md:flex-row items-center justify-between max-w-6xl w-full gap-12">
+
+                    {/* Text Section */}
                     <div className="max-w-lg text-center md:text-left">
-                        <h1 className="text-4xl font-extrabold text-blue-900 leading-tight drop-shadow-md">
+                        <motion.h1
+                            className="text-4xl font-extrabold text-blue-900 leading-tight drop-shadow-md hover-glow"
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ duration: 0.8, delay: 0.2 }}
+                        >
                             ARTIFICIAL<br />INTELLIGENCE
-                        </h1>
-                        <p className="mt-6 text-gray-700 text-base">
-                            Transform your ideas with our cutting-edge AI solutions. We build
-                            intelligent systems using machine learning, NLP, and computer
-                            vision to automate tasks, deliver insights, and drive innovation.
-                            From business intelligence to smart devices, our custom AI
-                            services boost efficiency, accuracy, and impact—tailored for your
-                            industry.
-                        </p>
+                        </motion.h1>
+
+                        <motion.p
+                            className="mt-6 text-gray-700 text-base"
+                            initial={{ x: -50, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            transition={{ duration: 0.8, delay: 0.5 }}
+                        >
+                            Transform your vision with our cutting-edge AI solutions.
+                            We specialize in building intelligent systems that harness the power
+                            of machine learning, natural language processing, and computer vision.
+                            <br /><br />
+                            Whether it's automating operations, generating insights, or enhancing
+                            customer experiences, our AI services are designed to boost efficiency,
+                            accuracy, and innovation—customized for your industry's unique needs.
+                        </motion.p>
                     </div>
-                    <div>
-                        <img
-                            src='./Assets/crypto.png'
+
+                    {/* Video Section */}
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9, rotate: -5 }}
+                        animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                        transition={{ duration: 0.8, delay: 0.8, ease: "easeOut" }}
+                        className="lg:w-1/2 w-full h-screen flex justify-center lg:justify-start items-center overflow-hidden"
+                    >
+                        <video
+                            src="./Assets/A.I..mp4"
                             alt="Artificial Intelligence"
-                            className="rounded-2xl shadow-lg w-full max-w-md"
+                            className="w-full h-screen object-cover"
+                            muted
+                            loop={false}
+                            onMouseEnter={e => e.currentTarget.play()}
+                            onMouseLeave={e => {
+                                e.currentTarget.pause();
+                                e.currentTarget.currentTime = 0;
+                            }}
                         />
-                    </div>
+                    </motion.div>
+
                 </div>
             </div>
-        </div>
-
-
-
-
+        </motion.div>
     );
 }
 
