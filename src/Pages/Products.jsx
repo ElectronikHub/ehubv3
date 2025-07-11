@@ -12,13 +12,15 @@ const Products = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [productSuggestions, setProductSuggestions] = useState([]);
   const [categorySuggestions, setCategorySuggestions] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
+ 
   const [showingFavorites, setShowingFavorites] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [sortOption, setSortOption] = useState('featured');
   const [showSidebar, setShowSidebar] = useState(false);
   const [categoriesFromDB, setCategoriesFromDB] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [favorites, setFavorites] = useState(() => {
     const saved = localStorage.getItem('favorites');
     return saved ? JSON.parse(saved) : [];
@@ -48,68 +50,56 @@ const Products = () => {
  useEffect(() => {
   const fetchProducts = async () => {
     try {
-      const res = await api.get('/',
-        { params: { sort: sortOption }}
-      ); 
-      const products = res.data;
-      console.log("Raw product sample:", products[0]);
-      const productsWithImages = await Promise.all(
-        products.map(async (product) => {
-          try {
-            const imageRes = await api.get(`/${product.id}/image`, { responseType: 'blob' });
-            const imageUrl = URL.createObjectURL(imageRes.data);
-            return {
-              ...product,
-              stock: Number(product.stock),
-              image: imageUrl
-            };
-          } catch (imageError) {
-            console.error('Image fetch failed for product ${product.id}', imageError);
-
-            return { ...product, imageUrl: '/img/default.png' };
-          }
-        })
-        );
-        setAllProducts(productsWithImages);
-      } catch (err) {
-        console.error('Failed to fetch products:', err);
-      }
-    };
-    fetchProducts();
-  }, [sortOption]);
-  // Fetch categories from backend
+      const res = await api.get('/', {
+        params: {
+          sort: sortOption,
+          page: currentPage,
+          category: selectedType !== 'ALL' ? selectedType : undefined,
+          search: searchQuery.trim() !== '' ? searchQuery.trim() : undefined,
+        }
+      });
+      setAllProducts(
+        (res.data.data || []).map(product => ({
+          ...product,
+          stock: Number(product.stock),
+          image: product.image || '/img/default.png'
+        }))
+      );
+      setTotalPages(res.data.last_page || 1);
+    } catch (err) {
+      console.error('Failed to fetch products:', err);
+    }
+  };
+  fetchProducts();
+}, [sortOption, currentPage, selectedType, searchQuery]);
  
   
   // Filtering and suggestions
-  useEffect(() => {
-    const normalizedType = selectedType.trim().toLowerCase();
+useEffect(() => {
+  if (!searchQuery) {
+    setProductSuggestions([]);
+    return;
+  }
+  const fetchSuggestions = async () => {
+    try {
+      const res = await api.get('/suggestions', {
+        params: { search: searchQuery }
+      });
+      setProductSuggestions(res.data || []);
+    } catch (err) {
+      setProductSuggestions([]);
+    }
+  };
+  fetchSuggestions();
+}, [searchQuery]);
 
-    const result = allProducts
-      .filter((product) => {
-        if (normalizedType === 'all') return true;
-        return product.category?.name?.trim().toLowerCase() === normalizedType;
-      })
-      .filter((product) =>
-        product.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.description?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-
-    setFilteredProducts(result);
-
-    // Suggestions
-    const query = searchQuery.toLowerCase();
-    const nameMatches = allProducts
-      .filter((p) => p.name?.toLowerCase().includes(query))
-      .map((p) => p.name);
-
-    setProductSuggestions(nameMatches.slice(0, 5));
-
-    const categoryMatches = categoriesFromDB
-      .filter((cat) => cat.name?.toLowerCase().includes(query))
-      .map((cat) => cat.name);
-
-    setCategorySuggestions(categoryMatches.slice(0, 5));
-  }, [selectedType, searchQuery, sortOption, allProducts, categoriesFromDB]);
+useEffect(() => {
+  const query = searchQuery.toLowerCase();
+  const categoryMatches = categoriesFromDB
+    .filter((cat) => cat.name?.toLowerCase().includes(query))
+    .map((cat) => cat.name);
+  setCategorySuggestions(categoryMatches.slice(0, 5));
+}, [searchQuery, categoriesFromDB]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -123,8 +113,31 @@ const Products = () => {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [profileDropdownOpen]);
 
-  const displayedProducts = filteredProducts.filter((product) =>
-    showingFavorites ? favorites.includes(product.name) : true
+  const displayedProducts = showingFavorites
+  ? allProducts.filter((product) => favorites.includes(product.name))
+  : allProducts;
+
+  // Pagination controls
+  const Pagination = () => (
+    <div className="flex justify-center items-center gap-2 my-6">
+      <button
+        onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+        disabled={currentPage === 1}
+        className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+      >
+        Previous
+      </button>
+      <span className="mx-2 text-sm">
+        Page {currentPage} of {totalPages}
+      </span>
+      <button
+        onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+        disabled={currentPage === totalPages}
+        className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+      >
+        Next
+      </button>
+    </div>
   );
 
   return (
@@ -222,6 +235,7 @@ const Products = () => {
                           onMouseDown={() => {
                             setSearchQuery(name);
                             setSelectedType('ALL');
+                             setCurrentPage(1);
                             setIsSearchFocused(false);
                           }}
                           className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -240,6 +254,7 @@ const Products = () => {
                           onMouseDown={() => {
                             setSelectedType(cat);
                             setSearchQuery('');
+                            setCurrentPage(1);
                             setIsSearchFocused(false);
                           }}
                           className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -314,6 +329,7 @@ const Products = () => {
         </div>
         {/* Product Grid */}
         <div className="w-full px-4 py-10 bg-tertiary mx-auto container">
+          <Pagination />
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6 mx-auto">
             {displayedProducts.map((product, index) => (
               <ProductCard
@@ -348,6 +364,7 @@ const Products = () => {
               />
             ))}
           </div>
+          <Pagination />
         </div>
         {/* Full-Screen Sidebar Overlay with Animation */}
         <AnimatePresence>
