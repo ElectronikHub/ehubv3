@@ -167,7 +167,7 @@ useEffect(() => {
         Page {currentPage} of {totalPages}
       </span>
       <button
-        onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+        onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))} 
         disabled={currentPage === totalPages}
         className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
       >
@@ -176,14 +176,14 @@ useEffect(() => {
     </div>
   );
 
-  const handleSignIn = () => {
+  const handleLogIn = () => {
   setProfileDropdownOpen(false);
-  // ... sign-in logic
+  navigate("/Login");
 };
 
-const handleCreateAccount = () => {
+const handleSignUp = () => {
   setProfileDropdownOpen(false);
-  // ... create logic
+  navigate("/Signup");
 };
 
  return (
@@ -210,23 +210,23 @@ const handleCreateAccount = () => {
             >
               <button
                 className="flex items-center gap-2 w-full text-left px-4 py-2 text-black hover:bg-gray-100 hover:text-primary transition-colors"
-                onClick={handleSignIn}
+                onClick={handleLogIn}
               >
-                {/* Sign In Icon */}
+               
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500 group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 17v1a3 3 0 01-3 3H7a3 3 0 01-3-3V6a3 3 0 013-3h6a3 3 0 013 3v1m-4 7h12m0 0l-4-4m4 4l-4 4" />
                 </svg>
-                Sign In
+                Log in
               </button>
               <button
                 className="flex items-center gap-2 w-full text-left px-4 py-2 text-black hover:bg-gray-100 hover:text-primary transition-colors"
-                onClick={handleCreateAccount}
+                onClick={handleSignUp}
               >
-                {/* Register Icon */}
+              
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500 group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm0 2c-2.67 0-8 1.337-8 4v3h16v-3c0-2.663-5.33-4-8-4zm6-2v2m0 0v2m0-2h2m-2 0h-2" />
                 </svg>
-                Create Account
+                Sign Up
               </button>
             </div>
             </div>
