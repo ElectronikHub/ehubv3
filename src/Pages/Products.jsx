@@ -75,7 +75,7 @@ const CARD_HEIGHT = 360;
  useEffect(() => {
   const fetchProducts = async () => {
     try {
-      const res = await api.get('/', {
+      const res = await api.get('http://localhost:8000/api/apiproducts', {
         params: {
           sort: sortOption,
           page: currentPage,

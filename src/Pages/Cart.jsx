@@ -1,8 +1,16 @@
 import React, { useEffect, useState } from 'react';
+import api from '../Data/axios'; // Axios instance with baseURL pointing to Laravel API
 
 function CartPage() {
   const [cartItems, setCartItems] = useState([]);
   const [removeQuantities, setRemoveQuantities] = useState({});
+  const [showModal, setShowModal] = useState(false);
+  const [checkoutData, setCheckoutData] = useState({
+    email: '',
+    phone: '',
+    location: '',
+    deliveryOption: 'COD',
+  });
 
   useEffect(() => {
     const cartData = JSON.parse(localStorage.getItem('cart')) || [];
@@ -53,8 +61,34 @@ function CartPage() {
       alert("Your cart is empty.");
       return;
     }
+    setShowModal(true);
+  };
 
-    alert("Proceeding to checkout..."); // Replace with real checkout logic or redirect
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setCheckoutData({ ...checkoutData, [name]: value });
+  };
+
+  const handleConfirmCheckout = async () => {
+    try {
+      const payload = {
+        ...checkoutData,
+        cart: cartItems,
+        total: total.toFixed(2),
+      };
+
+      const response = await api.post('/apiorders', payload);
+
+      if (response.status === 200 || response.status === 201) {
+        alert("Order placed successfully!");
+        localStorage.removeItem('cart');
+        setCartItems([]);
+        setShowModal(false);
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+      alert("Failed to place order. Please try again.");
+    }
   };
 
   const getSubtotal = () =>
@@ -153,8 +187,6 @@ function CartPage() {
                 <span className="text-green-600">₱{total.toFixed(2)}</span>
               </div>
             </div>
-
-            {/* Buy Now Button */}
             <button
               onClick={handleBuyNow}
               className="w-full mt-6 py-3 px-6 bg-green-600 text-white font-bold rounded-lg shadow-lg hover:bg-green-700 transition duration-300 ease-in-out animate-fade-in"
@@ -164,6 +196,64 @@ function CartPage() {
           </div>
         </div>
       </div>
+
+      {/* Checkout Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">Checkout Information</h2>
+
+            <div className="space-y-3">
+              <input
+                type="email"
+                name="email"
+                placeholder="Email"
+                value={checkoutData.email}
+                onChange={handleChange}
+                className="w-full border px-3 py-2 rounded"
+              />
+              <input
+                type="tel"
+                name="phone"
+                placeholder="Phone Number"
+                value={checkoutData.phone}
+                onChange={handleChange}
+                className="w-full border px-3 py-2 rounded"
+              />
+              <textarea
+                name="location"
+                placeholder="Delivery Address"
+                value={checkoutData.location}
+                onChange={handleChange}
+                className="w-full border px-3 py-2 rounded"
+              />
+              <select
+                name="deliveryOption"
+                value={checkoutData.deliveryOption}
+                onChange={handleChange}
+                className="w-full border px-3 py-2 rounded"
+              >
+                <option value="COD">Cash on Delivery (COD)</option>
+              </select>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmCheckout}
+                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              >
+                Confirm Order
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
