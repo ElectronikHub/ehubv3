@@ -41,7 +41,6 @@ function ProductDetails() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
-
   const [showModal, setShowModal] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1.5);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -194,18 +193,38 @@ function ProductDetails() {
             </p>
             {/* Improved Description */}
             <div className="mb-6">
-              <div>
+            <div>
+            {!descExpanded ? (
+              <>
                 {formatDescription(descToShow)}
                 {isLongDesc && (
                   <button
                     className="text-primary underline text-xs mt-1 focus:outline-none"
-                    onClick={() => setDescExpanded(v => !v)}
+                    onClick={() => setDescExpanded(true)}
                   >
-                    {descExpanded ? 'Show less' : 'Learn more'}
+                    Show more
                   </button>
                 )}
+              </>
+            ) : (
+              // Expanded: show full description in a scrollable box (slider)
+              <div className="relative">
+                <div
+                  className="max-h-64 overflow-y-auto pr-2 border rounded bg-gray-50"
+                  style={{ scrollbarWidth: 'thin' }}
+                >
+                  {formatDescription(description)}
+                </div>
+                <button
+                  className="text-primary underline text-xs mt-2 focus:outline-none"
+                  onClick={() => setDescExpanded(false)}
+                >
+                  Show less
+                </button>
               </div>
-            </div>
+            )}
+          </div>
+        </div>
 
             {inStock && (
               <div className="flex items-center gap-4 mb-8">
