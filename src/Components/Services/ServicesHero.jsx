@@ -62,13 +62,24 @@ function ServicesHero() {
     <section
       role="banner"
       aria-label="Our Services"
-      className="relative w-full min-h-[60vh] md:min-h-screen flex items-center bg-cover bg-center bg-no-repeat"
-      style={{
-        backgroundImage: "url('/Assets/bgnew1.png')",
-      }}
+      className="relative w-full min-h-[60vh] md:min-h-screen flex items-center bg-no-repeat bg-center bg-cover overflow-hidden"
+      // Removed backgroundImage style because video will be background
     >
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent z-0" />
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12 relative z-10">
+      {/* Background Video */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute top-0 left-0 w-full h-full object-cover z-0"
+        src="/Assets/bgsmoothnew.mp4" // <-- Replace with your actual video path
+      />
+
+      {/* Overlay Gradient */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent z-10" />
+
+      {/* Content */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12 relative z-20">
         <div className="text-start max-w-2xl">
           <motion.h2
             className="text-4xl sm:text-5xl lg:text-6xl archivo-black-regular text-secondary font-bold leading-tight pt-16 drop-shadow-lg"

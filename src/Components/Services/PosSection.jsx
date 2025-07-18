@@ -45,26 +45,25 @@ function ServiceCard() {
     videoRef.current.currentTime = 0;
   };
 
-  return (
-    <div
-    id = "point-of-sale-section"
-      ref={sectionRef}
-      className="w-full h-screen relative overflow-hidden"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      {/* Fullscreen Background Video without tint */}
-      <motion.video
-        ref={videoRef}
-        className="absolute inset-0 w-full h-full object-cover"
-        initial={false}
-        animate={trigger ? { scale: 1 } : { scale: 1.05 }}
-        transition={{ duration: 4, ease: "easeOut" }}
-        muted
-        playsInline
-        preload="auto"
-        src="/Assets/POS.mp4"
-      />
+    return (
+        <div
+        id = "point-of-sale-section"
+            className="w-full h-screen relative overflow-hidden"
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+        >
+            {/* Animated Background Video with Zoom-Out Effect */}
+            <motion.video
+                ref={videoRef}
+                className="absolute inset-0 w-full h-full object-cover scale-110"
+                initial={{ scale: 1.2 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 4, ease: "easeOut" }}
+                muted
+                playsInline
+                preload="none"
+                src="/Assets/POS.mp4"
+            />
 
       {/* Floating light effects */}
       <motion.div
