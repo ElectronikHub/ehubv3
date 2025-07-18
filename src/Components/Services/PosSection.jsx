@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 function ServiceCard() {
   const sectionRef = useRef(null);
   const videoRef = useRef(null);
-  const [hovered, setHovered] = useState(false);
+  const [ setHovered] = useState(false);
   const [scrollDir, setScrollDir] = useState("down");
   const [trigger, setTrigger] = useState(false);
 
