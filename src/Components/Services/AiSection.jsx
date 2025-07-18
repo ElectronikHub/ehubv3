@@ -1,74 +1,108 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
 function ServiceCard({ service }) {
-    return (
-        <motion.div
-            id="artificial-intelligence-section"
-            className="bg-tertiary"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: "easeOut" }}
-        >
-            {/* Top Accent Bar */}
-            <div className="w-screen h-8 bg-secondary" />
+  const sectionRef = useRef(null);
+  const [scrollDir, setScrollDir] = useState("down");
+  const [triggerAnimation, setTriggerAnimation] = useState(false);
 
-            {/* Main Container */}
-            <div className="min-h-screen flex items-center justify-center px-6">
-                <div className="flex flex-col md:flex-row items-center justify-between max-w-6xl w-full gap-12">
+  // Detect scroll direction
+  useEffect(() => {
+    let lastY = window.scrollY;
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+      setScrollDir(currentY > lastY ? "down" : "up");
+      lastY = currentY;
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
-                    {/* Text Section */}
-                    <div className="max-w-lg text-center md:text-left">
-                        <motion.h1
-                            className="text-4xl font-extrabold text-blue-900 leading-tight drop-shadow-md hover-glow"
-                            initial={{ scale: 0.8, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ duration: 0.8, delay: 0.2 }}
-                        >
-                            ARTIFICIAL<br />INTELLIGENCE
-                        </motion.h1>
+  // Trigger animation based on scroll and visibility
+  useEffect(() => {
+    const handleVisibility = () => {
+      const rect = sectionRef.current?.getBoundingClientRect();
+      const inView = rect?.top < window.innerHeight * 0.75 && rect?.bottom > 0;
+      if (scrollDir === "down" && inView && !triggerAnimation) {
+        setTriggerAnimation(true);
+      }
+    };
+    window.addEventListener("scroll", handleVisibility);
+    handleVisibility(); // on mount
+    return () => window.removeEventListener("scroll", handleVisibility);
+  }, [scrollDir, triggerAnimation]);
 
-                        <motion.p
-                            className="mt-6 text-gray-700 text-base"
-                            initial={{ x: -50, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            transition={{ duration: 0.8, delay: 0.5 }}
-                        >
-                            Transform your vision with our cutting-edge AI solutions.
-                            We specialize in building intelligent systems that harness the power
-                            of machine learning, natural language processing, and computer vision.
-                            <br /><br />
-                            Whether it's automating operations, generating insights, or enhancing
-                            customer experiences, our AI services are designed to boost efficiency,
-                            accuracy, and innovation—customized for your industry's unique needs.
-                        </motion.p>
-                    </div>
+  return (
+    <motion.div
+      ref={sectionRef}
+      id="artificial-intelligence-section"
+      className="bg-tertiary"
+      initial={{ opacity: 0, y: 50 }}
+      animate={triggerAnimation ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+      transition={{ duration: 1, ease: "easeOut" }}
+    >
+      {/* Top Accent Bar */}
+      <div className="w-full h-8 bg-secondary" />
 
-                    {/* Video Section */}
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9, rotate: -5 }}
-                        animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                        transition={{ duration: 0.8, delay: 0.8, ease: "easeOut" }}
-                        className="lg:w-1/2 w-full h-screen flex justify-center lg:justify-start items-center overflow-hidden"
-                    >
-                        <video
-                            src="./Assets/A.I..mp4"
-                            alt="Artificial Intelligence"
-                            className="w-full h-screen object-cover"
-                            muted
-                            loop={false}
-                            onMouseEnter={e => e.currentTarget.play()}
-                            onMouseLeave={e => {
-                                e.currentTarget.pause();
-                                e.currentTarget.currentTime = 0;
-                            }}
-                        />
-                    </motion.div>
+      {/* Main Container */}
+      <div className="min-h-screen flex items-center justify-center px-6 py-20">
+        <div className="flex flex-col-reverse md:flex-row items-center justify-between max-w-6xl w-full gap-12">
 
-                </div>
-            </div>
-        </motion.div>
-    );
+          {/* Text Section */}
+          <motion.div
+            className="w-full md:w-1/2 max-w-xl text-center md:text-left text-black"
+            initial={false}
+            animate={triggerAnimation ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-blue-900 leading-tight drop-shadow-md hover-glow">
+              ARTIFICIAL<br />INTELLIGENCE
+            </h1>
+
+            <motion.p
+              className="mt-6 text-base md:text-lg leading-relaxed text-black"
+              initial={false}
+              animate={triggerAnimation ? { x: 0, opacity: 1 } : { x: -50, opacity: 0 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+            >
+              Elevate your business with powerful, intuitive AI solutions. We engineer intelligent systems built on deep learning, natural language understanding, and real-time data processing.
+              <br /><br />
+              From predictive analytics to smart automation, our team designs scalable models tailored to your goals. Whether you’re optimizing logistics, creating smarter customer experiences, or uncovering insights hidden in big data—we empower you to lead with intelligence.
+              <br /><br />
+              Partner with us to harness AI responsibly and drive innovation across your operations.
+            </motion.p>
+          </motion.div>
+
+          {/* Video Section */}
+          <motion.div
+            initial={false}
+            animate={
+              triggerAnimation
+                ? { opacity: 1, scale: 1, rotate: 0 }
+                : { opacity: 0, scale: 0.9, rotate: -5 }
+            }
+            transition={{ duration: 0.8, delay: 0.8, ease: "easeOut" }}
+            className="w-full md:w-1/2 h-[70vh] flex justify-center items-center overflow-hidden"
+          >
+            <video
+              src="./Assets/A.I..mp4"
+              alt="Artificial Intelligence"
+              className="w-full h-full object-cover rounded-xl shadow-lg"
+              muted
+              loop
+              playsInline
+              onMouseEnter={(e) => e.currentTarget.play()}
+              onMouseLeave={(e) => {
+                e.currentTarget.pause();
+                e.currentTarget.currentTime = 0;
+              }}
+            />
+          </motion.div>
+
+        </div>
+      </div>
+    </motion.div>
+  );
 }
 
 export default ServiceCard;
