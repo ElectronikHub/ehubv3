@@ -2,6 +2,38 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
+// Improved formatDescription: preserves paragraphs and lists, and handles blank lines
+function formatDescription(desc) {
+  if (!desc) return '';
+  // Split by double newlines (paragraphs)
+  const paragraphs = desc.split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
+
+  return paragraphs.map((block, i) => {
+    // If block is a list (lines start with -, *, •, or number), render as list
+    const lines = block.split('\n').map(line => line.trim()).filter(Boolean);
+    const isList = lines.length > 1 && lines.every(line =>
+      /^([-*•]|\d+\.)\s+/.test(line)
+    );
+
+    if (isList) {
+      return (
+        <ul key={i} className="list-disc list-inside mb-2 text-gray-700 text-base">
+          {lines.map((line, j) => (
+            <li key={j}>{line.replace(/^([-*•]|\d+\.)\s+/, '')}</li>
+          ))}
+        </ul>
+      );
+    }
+
+    // Otherwise, treat as a paragraph and preserve manual line breaks
+    return (
+      <p key={i} className="mb-2 text-gray-700 text-base whitespace-pre-line">
+        {block}
+      </p>
+    );
+  });
+}
+
 function ProductDetails() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
@@ -15,7 +47,10 @@ function ProductDetails() {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
-  const [hasDragged, setHasDragged] = useState(false); // NEW
+  const [hasDragged, setHasDragged] = useState(false);
+
+  const [descExpanded, setDescExpanded] = useState(false);
+  const DESC_LIMIT = 400;
 
   const imgRef = useRef(null);
 
@@ -67,8 +102,7 @@ function ProductDetails() {
   };
 
   const openZoomModal = () => {
-    if (hasDragged) return; // PREVENT ZOOM IF DRAGGED
-
+    if (hasDragged) return;
     if (!showModal) {
       setZoomLevel(1);
       setPosition({ x: 0, y: 0 });
@@ -86,13 +120,13 @@ function ProductDetails() {
 
   const startDrag = (e) => {
     setIsDragging(true);
-    setHasDragged(false); // RESET ON NEW DRAG
+    setHasDragged(false);
     setStartPos({ x: e.clientX - position.x, y: e.clientY - position.y });
   };
 
   const duringDrag = (e) => {
     if (isDragging) {
-      setHasDragged(true); // MARK AS DRAGGED
+      setHasDragged(true);
       setPosition({
         x: e.clientX - startPos.x,
         y: e.clientY - startPos.y,
@@ -103,6 +137,11 @@ function ProductDetails() {
   const endDrag = () => {
     setIsDragging(false);
   };
+
+  // Description expand/collapse logic
+  const description = product.description || '';
+  const isLongDesc = description.length > DESC_LIMIT;
+  const descToShow = descExpanded || !isLongDesc ? description : description.slice(0, DESC_LIMIT) + '...';
 
   return (
     <div className="min-h-screen bg-white py-24">
@@ -153,7 +192,20 @@ function ProductDetails() {
             <p className={`mb-4 ${inStock ? 'text-green-600' : 'text-red-600'}`}>
               {inStock ? `In stock: ${product.stock}` : 'Out of stock'}
             </p>
-            <p className="text-gray-600 mb-6">{product.description}</p>
+            {/* Improved Description */}
+            <div className="mb-6">
+              <div>
+                {formatDescription(descToShow)}
+                {isLongDesc && (
+                  <button
+                    className="text-primary underline text-xs mt-1 focus:outline-none"
+                    onClick={() => setDescExpanded(v => !v)}
+                  >
+                    {descExpanded ? 'Show less' : 'Learn more'}
+                  </button>
+                )}
+              </div>
+            </div>
 
             {inStock && (
               <div className="flex items-center gap-4 mb-8">
