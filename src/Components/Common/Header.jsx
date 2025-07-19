@@ -3,7 +3,6 @@ import { useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
 import { motion, AnimatePresence } from "framer-motion";
 
-// If you use public/assets, use this path. Otherwise, import from src/assets
 const logoPath = "/Assets/Logo.png";
 
 const menuVariants = {
@@ -26,15 +25,12 @@ const Header = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu on route change
   useEffect(() => {
     setMenuOpen(false);
   }, [location.pathname]);
 
-  // Transparent only at top of home/services, else solid
   const isTransparent =
-    (location.pathname === "/" || location.pathname === "/services") &&
-    !scrolled;
+    (location.pathname === "/" || location.pathname === "/services") && !scrolled;
 
   return (
     <header
@@ -44,19 +40,21 @@ const Header = () => {
           : "bg-primary backdrop-brightness-100"
       }`}
     >
-      <div className="container mx-auto flex items-center justify-between py-3 px-4 md:px-6 relative">
-        <a href="/" className="flex items-center space-x-4">
-          <img src={logoPath} alt="EHUB LOGO" className="w-16 md:w-20" />
-          <span className="archivo-black-regular text-xl md:text-2xl text-tertiary leading-tight uppercase">
-            Electronik 
-            <span className="text-secondary">Hub</span>
+      <div className="w-full flex items-center justify-between py-3 px-4 sm:px-6 lg:px-8 relative">
+        {/* Logo */}
+        <a href="/" className="flex items-center space-x-3">
+          <img src={logoPath} alt="EHUB LOGO" className="w-14 sm:w-16 md:w-20" />
+          <span className="archivo-black-regular text-base sm:text-lg md:text-2xl text-tertiary leading-tight uppercase">
+            Electronik <span className="text-secondary">Hub</span>
           </span>
         </a>
+
         {/* Desktop Navbar */}
         <div className="hidden md:block bg-primary bg-opacity-95 backdrop-blur-sm p-2 rounded-lg">
           <Navbar />
         </div>
-        {/* Hamburger Icon for Mobile */}
+
+        {/* Hamburger Icon */}
         <button
           className="md:hidden z-50 flex flex-col justify-center items-center w-10 h-10"
           onClick={() => setMenuOpen((prev) => !prev)}
@@ -79,6 +77,7 @@ const Header = () => {
           />
         </button>
       </div>
+
       {/* Mobile Fullscreen Menu */}
       <AnimatePresence>
         {menuOpen && (
@@ -88,15 +87,10 @@ const Header = () => {
             animate="visible"
             exit="exit"
             variants={menuVariants}
-            className="inset-2 z-40 bg-primary bg-opacity-95 flex flex-col items-center md:hidden w-full h-screen left-0 backdrop-blur-sm text-tertiary text-center p-6"
+            className="fixed top-0 left-0 w-full h-screen z-40 bg-primary bg-opacity-95 flex flex-col items-center justify-center md:hidden backdrop-blur-sm text-tertiary text-center p-6"
           >
-
-
-            <div className="w-full"> 
-              <Navbar
-                mobile
-                onClickLink={() => setMenuOpen(false)}
-              />
+            <div className="w-full max-w-xs mx-auto">
+              <Navbar mobile onClickLink={() => setMenuOpen(false)} />
             </div>
           </motion.nav>
         )}

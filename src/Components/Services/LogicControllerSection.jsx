@@ -1,72 +1,113 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
 function ServiceCard({ service }) {
+  const sectionRef = useRef(null);
+  const videoRef = useRef(null);
+  const playTimeoutRef = useRef(null);
+  const [scrollDir, setScrollDir] = useState("down");
+  const [triggerAnimation, setTriggerAnimation] = useState(false);
+
+  useEffect(() => {
+    let lastY = window.scrollY;
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+      setScrollDir(currentY > lastY ? "down" : "up");
+      lastY = currentY;
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleVisibility = () => {
+      const rect = sectionRef.current?.getBoundingClientRect();
+      const inView = rect?.top < window.innerHeight * 0.75 && rect?.bottom > 0;
+      if (scrollDir === "down" && inView && !triggerAnimation) {
+        setTriggerAnimation(true);
+      }
+    };
+    window.addEventListener("scroll", handleVisibility);
+    handleVisibility();
+    return () => window.removeEventListener("scroll", handleVisibility);
+  }, [scrollDir, triggerAnimation]);
+
   return (
     <motion.div
-      id="logic-controller-section"
-      className="min-h-screen bg-primary flex flex-col lg:flex-row items-center justify-center px-6 sm:px-10 lg:px-20 py-16 gap-12"
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
-      viewport={{ once: true }}
+      ref={sectionRef}
+      id="artificial-intelligence-section"
+      className="bg-tertiary"
+      initial={{ opacity: 0, y: 50 }}
+      animate={triggerAnimation ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+      transition={{ duration: 1, ease: "easeOut" }}
     >
-      {/* Text Section */}
-      <motion.div
-        className="lg:w-1/2 w-full text-center lg:text-left flex flex-col justify-center items-center lg:items-start"
-        initial={{ opacity: 0, x: -50 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.3, duration: 0.8, ease: "easeOut" }}
-        viewport={{ once: true }}
-      >
-        <motion.h2
-          className="archivo-black-regular text-4xl sm:text-5xl lg:text-6xl text-tertiary mb-6 leading-tight drop-shadow-md"
-          whileHover={{
-            textShadow: "0px 0px 12px rgba(0, 255, 255, 0.8)",
-            transition: {
-              repeat: Infinity,
-              repeatType: "reverse",
-              duration: 0.8,
-            },
-          }}
-        >
-          LOGIC CONTROLLER
-        </motion.h2>
+      {/* Top Accent Bar */}
+      <div className="w-full h-4 sm:h-6 md:h-8 bg-secondary" />
 
-        <motion.p
-          className="montserrat-regular text-tertiary text-base sm:text-lg lg:text-xl max-w-xl leading-relaxed"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.6, ease: "easeOut" }}
-          viewport={{ once: true }}
-        >
-          Discover next-generation control with our tailored PLC and logic controller solutions. Designed to streamline, secure, and simplify industrial automation, our systems are built for robust performance in mission-critical environments.
-          <br /><br />
-          From manufacturing floors to smart infrastructure, we empower operations with reliable hardware, intuitive logic programming, and seamless integration across machinery, sensors, and enterprise systems. Real-time diagnostics, reduced downtime, and unmatched scalability are just the beginning.
-        </motion.p>
-      </motion.div>
+      {/* Main Container */}
+      <div className="min-h-[90vh] flex items-center justify-center px-4 sm:px-6 md:px-10 py-16 md:py-24">
+        <div className="flex flex-col-reverse md:flex-row items-center justify-between max-w-[1300px] w-full gap-10 md:gap-12">
 
-      {/* Video Section */}
-      <motion.div
-        className="lg:w-1/2 w-full h-[400px] sm:h-[500px] lg:h-[600px] flex justify-center items-center overflow-hidden rounded-2xl shadow-xl"
-        initial={{ scale: 0.95, opacity: 0 }}
-        whileInView={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.4, duration: 1, ease: "easeOut" }}
-        viewport={{ once: true }}
-      >
-        <video
-          src="/Assets/Logic.mp4"
-          className="w-full h-full object-cover rounded-2xl"
-          muted
-          loop
-          playsInline
-          onMouseEnter={(e) => e.currentTarget.play()}
-          onMouseLeave={(e) => {
-            e.currentTarget.pause();
-            e.currentTarget.currentTime = 0;
-          }}
-        />
-      </motion.div>
+          {/* Text Section */}
+          <motion.div
+            className="w-full md:w-1/2 text-center md:text-left text-black px-2 sm:px-4"
+            initial={false}
+            animate={triggerAnimation ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-blue-900 leading-snug drop-shadow-md hover-glow">
+              LOGIC CONTROLLER
+            </h1>
+
+            <motion.p
+              className="mt-5 text-sm sm:text-base md:text-lg leading-relaxed text-black"
+              initial={false}
+              animate={triggerAnimation ? { x: 0, opacity: 1 } : { x: -50, opacity: 0 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+            >
+              Discover next-generation control with our tailored PLC and logic controller solutions. Designed to streamline, secure, and simplify industrial automation, our systems are built for robust performance in mission-critical environments.
+              <br /><br />
+             From manufacturing floors to smart infrastructure, we empower operations with reliable hardware, intuitive logic programming, and seamless integration across machinery, sensors, and enterprise systems. Real-time diagnostics, reduced downtime, and unmatched scalability are just the beginning.
+            </motion.p>
+          </motion.div>
+
+          {/* Video Section */}
+          <motion.div
+            initial={false}
+            animate={
+              triggerAnimation
+                ? { opacity: 1, scale: 1, rotate: 0 }
+                : { opacity: 0, scale: 0.9, rotate: -5 }
+            }
+            transition={{ duration: 0.8, delay: 0.8, ease: "easeOut" }}
+            className="w-full md:w-1/2 h-[250px] sm:h-[300px] md:h-[400px] lg:h-[500px] flex justify-center items-center overflow-hidden px-2 sm:px-4"
+          >
+            <video
+  ref={videoRef}
+  src="./Assets/Logic.mp4"
+  className="w-full h-full object-cover rounded-xl shadow-lg"
+  muted
+  loop
+  playsInline
+  onMouseEnter={() => {
+    playTimeoutRef.current = setTimeout(() => {
+      if (videoRef.current) {
+        videoRef.current.play();
+      }
+    }, 2000);
+  }}
+  onMouseLeave={() => {
+    clearTimeout(playTimeoutRef.current);
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+  }}
+/>
+          </motion.div>
+
+        </div>
+      </div>
     </motion.div>
   );
 }

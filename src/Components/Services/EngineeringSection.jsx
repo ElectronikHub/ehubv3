@@ -1,119 +1,114 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
 function ServiceCard({ service }) {
+  const sectionRef = useRef(null);
+  const videoRef = useRef(null);
+  const playTimeoutRef = useRef(null);
   const [scrollDir, setScrollDir] = useState("down");
-  const [shouldAnimate, setShouldAnimate] = useState(false);
+  const [triggerAnimation, setTriggerAnimation] = useState(false);
 
-  // Detect scroll direction
   useEffect(() => {
     let lastY = window.scrollY;
-
-    const onScroll = () => {
-      const currentY = window.scrollY;
-      const direction = currentY > lastY ? "down" : "up";
-      if (direction !== scrollDir && Math.abs(currentY - lastY) > 10) {
-        setScrollDir(direction);
-      }
-      lastY = currentY > 0 ? currentY : 0;
-    };
-
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [scrollDir]);
-
-  // Trigger animation when section enters viewport while scrolling down
-  useEffect(() => {
     const handleScroll = () => {
-      const section = document.getElementById("design-prototyping-section");
-      if (section) {
-        const rect = section.getBoundingClientRect();
-        const inView = rect.top < window.innerHeight && rect.bottom > 0;
-        if (inView && scrollDir === "down" && !shouldAnimate) {
-          setShouldAnimate(true);
-        }
+      const currentY = window.scrollY;
+      setScrollDir(currentY > lastY ? "down" : "up");
+      lastY = currentY;
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleVisibility = () => {
+      const rect = sectionRef.current?.getBoundingClientRect();
+      const inView = rect?.top < window.innerHeight * 0.75 && rect?.bottom > 0;
+      if (scrollDir === "down" && inView && !triggerAnimation) {
+        setTriggerAnimation(true);
       }
     };
-
-    window.addEventListener("scroll", handleScroll);
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [scrollDir, shouldAnimate]);
+    window.addEventListener("scroll", handleVisibility);
+    handleVisibility();
+    return () => window.removeEventListener("scroll", handleVisibility);
+  }, [scrollDir, triggerAnimation]);
 
   return (
-    <div
-      id="design-prototyping-section"
-      className="min-h-screen bg-gray-100 flex flex-col lg:flex-row"
+    <motion.div
+      ref={sectionRef}
+      id="artificial-intelligence-section"
+      className="bg-tertiary"
+      initial={{ opacity: 0, y: 50 }}
+      animate={triggerAnimation ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+      transition={{ duration: 1, ease: "easeOut" }}
     >
-      {/* Left Section – Textual Content */}
-      <div className="flex-1 bg-[#103054] text-white p-8 sm:p-12 lg:p-16 flex flex-col justify-center items-center lg:items-start text-center lg:text-left relative overflow-hidden">
-        
-        {/* Floating Circle Decoration */}
-        <motion.div
-          className="hidden lg:block absolute top-0 left-[60%] w-72 h-full bg-[#103054] rounded-full translate-x-1/2 z-0"
-          animate={{ y: ["0%", "-10%", "0%"] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        />
+      {/* Top Accent Bar */}
+      <div className="w-full h-4 sm:h-6 md:h-8 bg-secondary" />
 
-        {/* Animated Text Content */}
-        <motion.div
-          className="relative z-10 max-w-xl"
-          initial={{ opacity: 0, x: -50 }}
-          animate={shouldAnimate ? { opacity: 1, x: 0 } : { opacity: 0, x: -50 }}
-          transition={{ duration: 1 }}
-        >
-          <motion.h2
-            className="archivo-black-regular text-4xl sm:text-5xl lg:text-6xl leading-tight text-tertiary mb-6 drop-shadow-md"
-            whileHover={{
-              textShadow: "0px 0px 12px rgba(0, 255, 255, 0.8)",
-              transition: {
-                repeat: Infinity,
-                repeatType: "reverse",
-                duration: 0.8,
-              },
-            }}
-          >
-            ENGINEERING, DESIGN & PROTOTYPING
-          </motion.h2>
+      {/* Main Container */}
+      <div className="min-h-[90vh] flex items-center justify-center px-4 sm:px-6 md:px-10 py-16 md:py-24">
+        <div className="flex flex-col-reverse md:flex-row items-center justify-between max-w-[1300px] w-full gap-10 md:gap-12">
 
-          <motion.p
-            className="montserrat-regular text-base sm:text-lg lg:text-xl leading-relaxed text-tertiary space-y-2"
-            initial={{ opacity: 0, y: 30 }}
-            animate={shouldAnimate ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-            transition={{ duration: 1, delay: 0.5 }}
+          {/* Text Section */}
+          <motion.div
+            className="w-full md:w-1/2 text-center md:text-left text-black px-2 sm:px-4"
+            initial={false}
+            animate={triggerAnimation ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
           >
-            Prototyping transforms concepts into tangible, testable realities. 
-            Our agile engineering and design processes enable rapid iteration cycles,
-            allowing teams to evaluate usability, performance, and feasibility early.
-            <br /><br />
-            Through precision-focused prototyping, we help clients visualize products,
-            test assumptions, and identify areas for refinement before investing in full-scale production.
-            This approach significantly reduces development risks, boosts confidence, and fast-tracks innovation to market.
-          </motion.p>
-        </motion.div>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-blue-900 leading-snug drop-shadow-md hover-glow">
+              ENGINEERING, DESIGN & PROTOTYPING
+            </h1>
+
+            <motion.p
+              className="mt-5 text-sm sm:text-base md:text-lg leading-relaxed text-black"
+              initial={false}
+              animate={triggerAnimation ? { x: 0, opacity: 1 } : { x: -50, opacity: 0 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+            >
+              Prototyping transforms concepts into tangible, testable realities. Our agile engineering and design processes enable rapid iteration cycles, allowing teams to evaluate usability, performance, and feasibility early.
+              <br /><br />
+             Through precision-focused prototyping, we help clients visualize products, test assumptions, and identify areas for refinement before investing in full-scale production. This approach significantly reduces development risks, boosts confidence, and fast-tracks innovation to market.
+            </motion.p>
+          </motion.div>
+
+          {/* Video Section */}
+          <motion.div
+            initial={false}
+            animate={
+              triggerAnimation
+                ? { opacity: 1, scale: 1, rotate: 0 }
+                : { opacity: 0, scale: 0.9, rotate: -5 }
+            }
+            transition={{ duration: 0.8, delay: 0.8, ease: "easeOut" }}
+            className="w-full md:w-1/2 h-[250px] sm:h-[300px] md:h-[400px] lg:h-[500px] flex justify-center items-center overflow-hidden px-2 sm:px-4"
+          >
+            <video
+  ref={videoRef}
+  src="./Assets/Prototyping.mp4"
+  className="w-full h-full object-cover rounded-xl shadow-lg"
+  muted
+  loop
+  playsInline
+  onMouseEnter={() => {
+    playTimeoutRef.current = setTimeout(() => {
+      if (videoRef.current) {
+        videoRef.current.play();
+      }
+    }, 2000);
+  }}
+  onMouseLeave={() => {
+    clearTimeout(playTimeoutRef.current);
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+  }}
+/>
+          </motion.div>
+
+        </div>
       </div>
-
-      {/* Right Section – Video Presentation */}
-      <motion.div
-        className="flex-1 w-full h-72 sm:h-96 lg:h-auto overflow-hidden"
-        initial={{ scale: 1.1 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 1.5, ease: "easeOut" }}
-      >
-        <video
-          src="/Assets/Prototyping.mp4"
-          className="w-full h-full object-cover"
-          muted
-          loop
-          playsInline
-          onMouseEnter={(e) => e.currentTarget.play()}
-          onMouseLeave={(e) => {
-            e.currentTarget.pause();
-            e.currentTarget.currentTime = 0;
-          }}
-        />
-      </motion.div>
-    </div>
+    </motion.div>
   );
 }
 

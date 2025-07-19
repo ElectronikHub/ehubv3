@@ -1,134 +1,115 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
-// Animation variants
-const containerVariants = {
-  hidden: { opacity: 0, y: 50 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.8,
-      ease: "easeOut",
-      staggerChildren: 0.3,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.8, ease: "easeOut" },
-  },
-};
-
-const imageVariants = {
-  hidden: { opacity: 0, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 1, ease: "easeOut" },
-  },
-};
-
-export default function ServiceCard() {
+function ServiceCard({ service }) {
+  const sectionRef = useRef(null);
+  const videoRef = useRef(null);
+  const playTimeoutRef = useRef(null);
   const [scrollDir, setScrollDir] = useState("down");
-  const [shouldAnimate, setShouldAnimate] = useState(false);
+  const [triggerAnimation, setTriggerAnimation] = useState(false);
 
-  // Scroll direction detection
   useEffect(() => {
     let lastY = window.scrollY;
-
-    const onScroll = () => {
-      const currentY = window.scrollY;
-      const direction = currentY > lastY ? "down" : "up";
-      if (direction !== scrollDir && Math.abs(currentY - lastY) > 10) {
-        setScrollDir(direction);
-      }
-      lastY = Math.max(currentY, 0);
-    };
-
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [scrollDir]);
-
-  // Trigger animation on downward scroll into view
-  useEffect(() => {
     const handleScroll = () => {
-      const section = document.getElementById("automation-security-section");
-      if (section) {
-        const rect = section.getBoundingClientRect();
-        const inView = rect.top < window.innerHeight && rect.bottom > 0;
-        if (inView && scrollDir === "down" && !shouldAnimate) {
-          setShouldAnimate(true);
-        }
+      const currentY = window.scrollY;
+      setScrollDir(currentY > lastY ? "down" : "up");
+      lastY = currentY;
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleVisibility = () => {
+      const rect = sectionRef.current?.getBoundingClientRect();
+      const inView = rect?.top < window.innerHeight * 0.75 && rect?.bottom > 0;
+      if (scrollDir === "down" && inView && !triggerAnimation) {
+        setTriggerAnimation(true);
       }
     };
-
-    window.addEventListener("scroll", handleScroll);
-    handleScroll(); // Run once on mount
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [scrollDir, shouldAnimate]);
+    window.addEventListener("scroll", handleVisibility);
+    handleVisibility();
+    return () => window.removeEventListener("scroll", handleVisibility);
+  }, [scrollDir, triggerAnimation]);
 
   return (
     <motion.div
-      id="automation-security-section"
-      className="bg-white py-24 px-6 sm:px-10 lg:px-20 min-h-screen flex items-center"
-      initial="hidden"
-      animate={shouldAnimate ? "visible" : "hidden"}
-      variants={containerVariants}
+      ref={sectionRef}
+      id="artificial-intelligence-section"
+      className="bg-tertiary"
+      initial={{ opacity: 0, y: 50 }}
+      animate={triggerAnimation ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+      transition={{ duration: 1, ease: "easeOut" }}
     >
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-32 items-center">
+      {/* Top Accent Bar */}
+      <div className="w-full h-4 sm:h-6 md:h-8 bg-secondary" />
 
-        {/* Video Section */}
-        <motion.div
-          className="flex justify-center lg:justify-end group perspective-1000"
-          variants={itemVariants}
-        >
+      {/* Main Container */}
+      <div className="min-h-[90vh] flex items-center justify-center px-4 sm:px-6 md:px-10 py-16 md:py-24">
+        <div className="flex flex-col-reverse md:flex-row items-center justify-between max-w-[1300px] w-full gap-10 md:gap-12">
+
+          {/* Text Section */}
           <motion.div
-            className="rounded-2xl w-full max-w-md shadow-xl overflow-hidden transform transition-transform duration-500 group-hover:rotate-y-3 group-hover:scale-105"
-            variants={imageVariants}
+            className="w-full md:w-1/2 text-center md:text-left text-black px-2 sm:px-4"
+            initial={false}
+            animate={triggerAnimation ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-blue-900 leading-snug drop-shadow-md hover-glow">
+              AUTOMATION & SECURITY
+            </h1>
+
+            <motion.p
+              className="mt-5 text-sm sm:text-base md:text-lg leading-relaxed text-black"
+              initial={false}
+              animate={triggerAnimation ? { x: 0, opacity: 1 } : { x: -50, opacity: 0 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+            >
+              Empower your environment with cutting-edge smart automation and security solutions. Whether it's managing access with smart locks, monitoring spaces through CCTV, or controlling gates and lighting remotely, our systems deliver unmatched convenience and protection.
+              <br /><br />
+             Receive real-time alerts, integrate seamlessly with mobile apps, and enjoy peace of mind with always-on surveillance. Designed with simplicity and efficiency in mind, our customizable systems evolve with your needs—keeping your home or business secure, smart, and future-ready.
+            </motion.p>
+          </motion.div>
+
+          {/* Video Section */}
+          <motion.div
+            initial={false}
+            animate={
+              triggerAnimation
+                ? { opacity: 1, scale: 1, rotate: 0 }
+                : { opacity: 0, scale: 0.9, rotate: -5 }
+            }
+            transition={{ duration: 0.8, delay: 0.8, ease: "easeOut" }}
+            className="w-full md:w-1/2 h-[250px] sm:h-[300px] md:h-[400px] lg:h-[500px] flex justify-center items-center overflow-hidden px-2 sm:px-4"
           >
             <video
-              src="/Assets/Automation.mp4"
-              className="w-full h-full object-cover"
-              muted
-              loop
-              playsInline
-              onMouseEnter={(e) => e.currentTarget.play()}
-              onMouseLeave={(e) => {
-                e.currentTarget.pause();
-                e.currentTarget.currentTime = 0;
-              }}
-            />
+  ref={videoRef}
+  src="./Assets/Automation.mp4"
+  className="w-full h-full object-cover rounded-xl shadow-lg"
+  muted
+  loop
+  playsInline
+  onMouseEnter={() => {
+    playTimeoutRef.current = setTimeout(() => {
+      if (videoRef.current) {
+        videoRef.current.play();
+      }
+    }, 2000);
+  }}
+  onMouseLeave={() => {
+    clearTimeout(playTimeoutRef.current);
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+  }}
+/>
           </motion.div>
-        </motion.div>
 
-        {/* Text Section */}
-        <div className="text-center lg:text-left">
-          <motion.h2
-            className="text-4xl sm:text-5xl lg:text-6xl archivo-black-regular text-primary mb-8 leading-tight"
-            variants={itemVariants}
-          >
-            AUTOMATION & SECURITY
-          </motion.h2>
-          <motion.p
-            className="text-lg sm:text-xl text-gray-700 montserrat-regular leading-relaxed space-y-4"
-            variants={itemVariants}
-          >
-            Empower your environment with cutting-edge smart automation and security solutions.
-            Whether it's managing access with smart locks, monitoring spaces through CCTV, or controlling gates and lighting remotely,
-            our systems deliver unmatched convenience and protection.
-            <br /><br />
-            Receive real-time alerts, integrate seamlessly with mobile apps, and enjoy peace of mind with always-on surveillance.
-            Designed with simplicity and efficiency in mind, our customizable systems evolve with your needs—keeping your home or business
-            secure, smart, and future-ready.
-          </motion.p>
         </div>
-
       </div>
     </motion.div>
   );
 }
+
+export default ServiceCard;
