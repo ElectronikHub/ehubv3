@@ -108,4 +108,4 @@ function ProductCard({ name, price, id, images, isFavorite, toggleFavorite, onAd
   );
 }
 
-export default ProductCard;
+  export default ProductCard;

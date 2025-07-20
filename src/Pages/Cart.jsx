@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import api from '../Data/axios'; // Axios instance with baseURL pointing to Laravel API
+import axios from 'axios';
 
 function CartPage() {
   const [cartItems, setCartItems] = useState([]);
   const [removeQuantities, setRemoveQuantities] = useState({});
-  const [showModal, setShowModal] = useState(false);
   const [checkoutData, setCheckoutData] = useState({
     email: '',
     phone: '',
     location: '',
-    deliveryOption: 'COD',
+    deliveryOption: 'Cash on Delivery',
   });
 
   useEffect(() => {
@@ -36,10 +35,7 @@ function CartPage() {
 
     const updatedCart = [...cartItems];
     if (updatedCart[indexToRemove].quantity > amountToRemove) {
-      updatedCart[indexToRemove] = {
-        ...updatedCart[indexToRemove],
-        quantity: updatedCart[indexToRemove].quantity - amountToRemove,
-      };
+      updatedCart[indexToRemove].quantity -= amountToRemove;
     } else {
       updatedCart.splice(indexToRemove, 1);
     }
@@ -102,6 +98,47 @@ function CartPage() {
   const tax = subtotal * taxRate;
   const total = subtotal + tax;
 
+  const handleCheckoutChange = (e) => {
+    setCheckoutData({ ...checkoutData, [e.target.name]: e.target.value });
+  };
+
+  const handleCheckoutSubmit = async () => {
+    try {
+ const payload = {
+  email: checkoutData.email,
+  phone: checkoutData.phone,
+  location: checkoutData.location,
+  deliveryOption: checkoutData.deliveryOption,
+  total: total.toFixed(2),
+  cart: cartItems.map((item) => ({
+    id: item.id,
+    name: item.name,
+    quantity: item.quantity,
+    price: parseFloat(item.price.replace('₱', '')),
+  })),
+};
+
+
+      await axios.post("http://localhost:8000/api/apiorders", payload);
+
+      alert("Order placed successfully!");
+      localStorage.removeItem("cart");
+      setCartItems([]);
+   } catch (error) {
+  if (error.response && error.response.status === 422) {
+    console.error("Validation error:", error.response.data.errors);
+    alert(
+      "Validation error:\n" +
+        JSON.stringify(error.response.data.errors, null, 2)
+    );
+  } else {
+    console.error("Checkout error:", error);
+    alert("Something went wrong during checkout.");
+  }
+}
+
+  };
+
   return (
     <div className="min-h-screen pt-32 bg-gray-50">
       <div className="container mx-auto p-6">
@@ -115,10 +152,7 @@ function CartPage() {
             ) : (
               <div className="space-y-6">
                 {cartItems.map((item, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center bg-white rounded-lg shadow overflow-hidden"
-                  >
+                  <div key={index} className="flex items-center bg-white rounded-lg shadow overflow-hidden">
                     <img
                       src={
                         Array.isArray(item.images)
@@ -132,9 +166,7 @@ function CartPage() {
                     />
                     <div className="flex-1 p-4">
                       <h2 className="text-xl font-semibold text-gray-800">{item.name}</h2>
-                      <p className="text-gray-500 mt-1">
-                        Unit Price: ₱{item.price.replace('₱', '')}
-                      </p>
+                      <p className="text-gray-500 mt-1">Unit Price: ₱{item.price.replace('₱', '')}</p>
                       <p className="text-gray-500 mt-1">Quantity: {item.quantity}</p>
                       <p className="font-bold mt-2 text-lg">
                         Total: ₱
@@ -142,14 +174,8 @@ function CartPage() {
                       </p>
                     </div>
                     <div className="flex flex-col items-center justify-center gap-3 px-4">
-                      <label
-                        htmlFor={`remove-qty-${index}`}
-                        className="text-sm font-medium text-gray-600"
-                      >
-                        Remove Qty
-                      </label>
+                      <label className="text-sm font-medium text-gray-600">Remove Qty</label>
                       <input
-                        id={`remove-qty-${index}`}
                         type="number"
                         min="1"
                         max={item.quantity}
@@ -170,10 +196,11 @@ function CartPage() {
             )}
           </div>
 
-          {/* Summary */}
-          <div className="w-full md:w-96 bg-white rounded-lg shadow p-6 animate-fade-in">
-            <h2 className="text-xl font-extrabold text-center mb-6 border-b pb-3">Summary</h2>
-            <div className="space-y-4">
+          {/* Checkout Summary */}
+          <div className="w-full md:w-96 bg-white rounded-lg shadow p-6 space-y-4">
+            <h2 className="text-xl font-extrabold text-center mb-4 border-b pb-3">Summary</h2>
+
+            <div className="space-y-2">
               <div className="flex justify-between text-gray-700">
                 <span>Subtotal:</span>
                 <span>₱{subtotal.toFixed(2)}</span>
@@ -187,11 +214,50 @@ function CartPage() {
                 <span className="text-green-600">₱{total.toFixed(2)}</span>
               </div>
             </div>
+
+            {/* Checkout Form */}
+            <div className="space-y-2 pt-4">
+              <input
+                type="email"
+                name="email"
+                placeholder="Email"
+                value={checkoutData.email}
+                onChange={handleCheckoutChange}
+                className="w-full px-3 py-2 border rounded"
+              />
+              <input
+                type="text"
+                name="phone"
+                placeholder="Phone"
+                value={checkoutData.phone}
+                onChange={handleCheckoutChange}
+                className="w-full px-3 py-2 border rounded"
+              />
+              <input
+                type="text"
+                name="location"
+                placeholder="Location"
+                value={checkoutData.location}
+                onChange={handleCheckoutChange}
+                className="w-full px-3 py-2 border rounded"
+              />
+              <select
+                name="deliveryOption"
+                value={checkoutData.deliveryOption}
+                onChange={handleCheckoutChange}
+                className="w-full px-3 py-2 border rounded"
+              >
+                <option value="Cash on Delivery">Cash on Delivery</option>
+                <option value="Pickup">Pickup</option>
+              </select>
+            </div>
+
             <button
-              onClick={handleBuyNow}
-              className="w-full mt-6 py-3 px-6 bg-green-600 text-white font-bold rounded-lg shadow-lg hover:bg-green-700 transition duration-300 ease-in-out animate-fade-in"
+              onClick={handleCheckoutSubmit}
+              className="w-full mt-4 py-3 px-6 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg"
+              disabled={cartItems.length === 0}
             >
-              Buy Now
+              Place Order
             </button>
           </div>
         </div>

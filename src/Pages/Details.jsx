@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
@@ -98,6 +99,7 @@ function ProductDetails() {
         const res = await axios.get(`http://localhost:8000/api/apiproducts/${id}`);
         const productData = res.data;
         setProduct(productData);
+        setImages(Array.isArray(productData.images) ? productData.images : []);
         setImages(Array.isArray(productData.images) ? productData.images : []);
         setLoading(false);
       } catch (error) {
@@ -201,12 +203,26 @@ const openZoomModal = () => {
                   />
                 </div>
 
+                <div className="relative w-full max-w-md overflow-hidden rounded-lg shadow-lg border border-gray-300">
+                  <img
+                    src={images[currentImageIndex]}
+                    alt={`Product ${currentImageIndex + 1}`}
+                    onClick={openZoomModal}
+                    className="w-full object-contain cursor-zoom-in"
+                  />
+                </div>
+
                 <div className="flex gap-3 mt-4">
                   {images.map((img, i) => (
                     <img
                       key={i}
                       src={img}
                       alt={`Thumbnail ${i + 1}`}
+                      onClick={() => {
+                        setCurrentImageIndex(i);
+                        setZoomLevel(1.5);
+                        setPosition({ x: 0, y: 0 });
+                      }}
                       onClick={() => {
                         setCurrentImageIndex(i);
                         setZoomLevel(1.5);
@@ -272,12 +288,15 @@ const openZoomModal = () => {
               <div className="flex items-center gap-4 mb-8">
                 <span>Quantity:</span>
                 <button onClick={decreaseQuantity} className="bg-gray-200 px-2 rounded">−</button>
+                <button onClick={decreaseQuantity} className="bg-gray-200 px-2 rounded">−</button>
                 <input
                   type="number"
                   value={quantity}
                   onChange={handleQuantityChange}
                   className="w-12 text-center border rounded"
+                  className="w-12 text-center border rounded"
                 />
+                <button onClick={increaseQuantity} className="bg-gray-200 px-2 rounded">+</button>
                 <button onClick={increaseQuantity} className="bg-gray-200 px-2 rounded">+</button>
               </div>
             )}
