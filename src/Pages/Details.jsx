@@ -42,7 +42,8 @@ function ProductDetails() {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [zoomLevel, setZoomLevel] = useState(1.5);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const ZOOM_LEVELS = [1, 2, 3];
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
@@ -50,9 +51,47 @@ function ProductDetails() {
 
   const [descExpanded, setDescExpanded] = useState(false);
   const DESC_LIMIT = 400;
+  const [fullscreenRequested, setFullscreenRequested] = useState(false);
 
   const imgRef = useRef(null);
+  const modalRef = useRef(null);
 
+  useEffect(() => {
+  if (showModal && fullscreenRequested) {
+    const modal = modalRef.current;
+
+    // Allow a slight delay to ensure it's attached to the DOM
+    setTimeout(() => {
+      if (!modal) return;
+
+      if (modal.requestFullscreen) {
+        modal.requestFullscreen();
+      } else if (modal.webkitRequestFullscreen) {
+        modal.webkitRequestFullscreen();
+      } else if (modal.msRequestFullscreen) {
+        modal.msRequestFullscreen();
+      }
+
+      // Reset the flag
+      setFullscreenRequested(false);
+    }, 100); // 100ms gives React time to render and attach the element
+  }
+}, [showModal, fullscreenRequested]);
+
+ const enterFullscreen = () => {
+  setTimeout(() => {
+    const modal = modalRef.current;
+    if (!modal) return;
+
+    if (modal.requestFullscreen) {
+      modal.requestFullscreen();
+    } else if (modal.webkitRequestFullscreen) {
+      modal.webkitRequestFullscreen();
+    } else if (modal.msRequestFullscreen) {
+      modal.msRequestFullscreen();
+    }
+  }, 0); // defer execution to the next event loop
+};
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -100,20 +139,23 @@ function ProductDetails() {
     alert('Added to cart!');
   };
 
-  const openZoomModal = () => {
-    if (hasDragged) return;
-    if (!showModal) {
-      setZoomLevel(1);
-      setPosition({ x: 0, y: 0 });
-      setShowModal(true);
-    } else {
-      setZoomLevel(prev => (prev >= 6 ? 2 : prev + 0.5));
-    }
-  };
+const openZoomModal = () => {
+  if (hasDragged) return;
+  if (!showModal) {
+    setZoomLevel(1);
+    setPosition({ x: 0, y: 0 });
+    setShowModal(true);
+  } else {
+    setZoomLevel((prev) => {
+      const nextIndex = (ZOOM_LEVELS.indexOf(prev) + 1) % ZOOM_LEVELS.length;
+      return ZOOM_LEVELS[nextIndex];
+    });
+  }
+};
 
   const closeModal = () => {
     setShowModal(false);
-    setZoomLevel(1.5);
+    setZoomLevel(1);
     setPosition({ x: 0, y: 0 });
   };
 
@@ -253,39 +295,58 @@ function ProductDetails() {
       {/* Modal for zoomed image */}
       {showModal && (
         <div
+           ref={modalRef}
           className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
           onMouseMove={duringDrag}
           onMouseUp={endDrag}
           onMouseLeave={endDrag}
+          onClick={closeModal}
         >
-          <div className="absolute top-4 right-4">
-            <button
-              onClick={closeModal}
-              className="text-white text-xl bg-gray-800 rounded-full px-3 py-1"
-            >
-              ✕
-            </button>
-          </div>
+       <div className="absolute top-4 right-4 flex gap-2 z-10">
+      <button
+          onClick={() => {
+            setShowModal(true);
+            setFullscreenRequested(true);
+          }}
+          title="Fullscreen"
+          className="text-white bg-gray-800 rounded-full px-3 py-1 text-sm"
+        >
+          ⛶
+        </button>
+        <button
+          onClick={closeModal}
+          title="Close"
+          className="text-white bg-gray-800 rounded-full px-3 py-1 text-xl"
+        >
+          ✕
+        </button>
+      </div>
 
-          <div className="absolute bottom-4 text-center w-full text-white text-sm pointer-events-none">
-            Click and hold to drag image. Click again to zoom in.
+         <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-60 px-4 py-2 rounded text-white text-sm z-10">
+          Click and drag to move. Click image to zoom. ⛶ and click the image again to go fullscreen.
+        </div>
+          <div
+            onClick={(e) => e.stopPropagation()} // prevents outer click close
+            className="relative max-w-[95%] max-h-[95%] flex items-center justify-center"
+          >
+       <img
+              ref={imgRef}
+              src={images[currentImageIndex]}
+              alt="Zoomed Product"
+              onMouseDown={startDrag}
+              onClick={openZoomModal}
+              style={{
+                transform: `scale(${zoomLevel}) translate(${position.x / zoomLevel}px, ${position.y / zoomLevel}px)`,
+                cursor: isDragging ? 'grabbing' : 'zoom-in',
+                transition: isDragging ? 'none' : 'transform 0.3s ease',
+                transformOrigin: 'center',
+                imageRendering: 'auto', // <-- Use this for better compression rendering
+                maxWidth: '100%',
+                maxHeight: '100%',
+              }}
+              className="max-h-[90%] max-w-[90%] object-contain shadow-lg rounded border border-gray-200 bg-white"
+            />
           </div>
-
-          <img
-            ref={imgRef}
-            src={images[currentImageIndex]}
-            alt="Zoomed Product"
-            onMouseDown={startDrag}
-            onClick={openZoomModal}
-            style={{
-              transform: `scale(${zoomLevel}) translate(${position.x / zoomLevel}px, ${position.y / zoomLevel}px)`,
-              cursor: isDragging ? 'grabbing' : 'zoom-in',
-              transition: isDragging ? 'none' : 'transform 0.3s ease',
-              transformOrigin: 'center',
-            }}
-            className="max-h-[90%] max-w-[90%] object-contain"
-            draggable={false}
-          />
         </div>
       )}
     </div>
