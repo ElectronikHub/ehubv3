@@ -6,7 +6,7 @@ import Products from "./Pages/Products";
 import Blog from "./Pages/Blog";
 import About from "./Pages/About";
 import CartPage from "./Pages/Cart";
-import Detail from "./Pages/Details"; // <-- Import Cart component if needed
+import Detail from "./Pages/Details"; 
 import NotFound from "./Pages/NotFound"; // <-- Import NotFound here
 
 const AppRoutes = () => (
