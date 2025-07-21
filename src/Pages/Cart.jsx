@@ -10,6 +10,7 @@ function CartPage() {
     location: '',
     deliveryOption: 'Cash on Delivery',
   });
+  const [voucherCode, setVoucherCode] = useState('');
 
   useEffect(() => {
     const cartData = JSON.parse(localStorage.getItem('cart')) || [];
@@ -81,6 +82,7 @@ function CartPage() {
     quantity: item.quantity,
     price: parseFloat(item.price.replace('₱', '')),
   })),
+  voucher: voucherCode, // <-- add this line
 };
 
 
@@ -214,6 +216,15 @@ function CartPage() {
                 <option value="Cash on Delivery">Cash on Delivery</option>
                 <option value="Pickup">Pickup</option>
               </select>
+
+              <input
+              type="text"
+              name="voucher"
+              placeholder="Voucher Code"
+              value={voucherCode}
+              onChange={e => setVoucherCode(e.target.value)}
+              className="w-full px-3 py-2 border rounded"
+            />
             </div>
 
             <button
