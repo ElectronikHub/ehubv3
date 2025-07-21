@@ -1,39 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-
-// Improved formatDescription: preserves paragraphs and lists, and handles blank lines
-function formatDescription(desc) {
-  if (!desc) return '';
-  // Split by double newlines (paragraphs)
-  const paragraphs = desc.split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
-
-  return paragraphs.map((block, i) => {
-    // If block is a list (lines start with -, *, •, or number), render as list
-    const lines = block.split('\n').map(line => line.trim()).filter(Boolean);
-    const isList = lines.length > 1 && lines.every(line =>
-      /^([-*•]|\d+\.)\s+/.test(line)
-    );
-
-    if (isList) {
-      return (
-        <ul key={i} className="list-disc list-inside mb-2 text-gray-700 text-base">
-          {lines.map((line, j) => (
-            <li key={j}>{line.replace(/^([-*•]|\d+\.)\s+/, '')}</li>
-          ))}
-        </ul>
-      );
-    }
-
-    // Otherwise, treat as a paragraph and preserve manual line breaks
-    return (
-      <p key={i} className="mb-2 text-gray-700 text-base whitespace-pre-line">
-        {block}
-      </p>
-    );
-  });
-}
 
 function ProductDetails() {
   const { id } = useParams();
@@ -42,64 +9,23 @@ function ProductDetails() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
+
   const [showModal, setShowModal] = useState(false);
-  const [zoomLevel, setZoomLevel] = useState(1);
-  const ZOOM_LEVELS = [1, 2, 3];
+  const [zoomLevel, setZoomLevel] = useState(1.5);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
-  const [hasDragged, setHasDragged] = useState(false);
-
-  const [descExpanded, setDescExpanded] = useState(false);
-  const DESC_LIMIT = 400;
-  const [fullscreenRequested, setFullscreenRequested] = useState(false);
+  const [hasDragged, setHasDragged] = useState(false); // NEW
+  
 
   const imgRef = useRef(null);
-  const modalRef = useRef(null);
 
-  useEffect(() => {
-  if (showModal && fullscreenRequested) {
-    const modal = modalRef.current;
-
-    // Allow a slight delay to ensure it's attached to the DOM
-    setTimeout(() => {
-      if (!modal) return;
-
-      if (modal.requestFullscreen) {
-        modal.requestFullscreen();
-      } else if (modal.webkitRequestFullscreen) {
-        modal.webkitRequestFullscreen();
-      } else if (modal.msRequestFullscreen) {
-        modal.msRequestFullscreen();
-      }
-
-      // Reset the flag
-      setFullscreenRequested(false);
-    }, 100); // 100ms gives React time to render and attach the element
-  }
-}, [showModal, fullscreenRequested]);
-
- const enterFullscreen = () => {
-  setTimeout(() => {
-    const modal = modalRef.current;
-    if (!modal) return;
-
-    if (modal.requestFullscreen) {
-      modal.requestFullscreen();
-    } else if (modal.webkitRequestFullscreen) {
-      modal.webkitRequestFullscreen();
-    } else if (modal.msRequestFullscreen) {
-      modal.msRequestFullscreen();
-    }
-  }, 0); // defer execution to the next event loop
-};
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const res = await axios.get(`http://localhost:8000/api/apiproducts/${id}`);
         const productData = res.data;
         setProduct(productData);
-        setImages(Array.isArray(productData.images) ? productData.images : []);
         setImages(Array.isArray(productData.images) ? productData.images : []);
         setLoading(false);
       } catch (error) {
@@ -141,35 +67,33 @@ function ProductDetails() {
     alert('Added to cart!');
   };
 
-const openZoomModal = () => {
-  if (hasDragged) return;
-  if (!showModal) {
-    setZoomLevel(1);
-    setPosition({ x: 0, y: 0 });
-    setShowModal(true);
-  } else {
-    setZoomLevel((prev) => {
-      const nextIndex = (ZOOM_LEVELS.indexOf(prev) + 1) % ZOOM_LEVELS.length;
-      return ZOOM_LEVELS[nextIndex];
-    });
-  }
-};
+  const openZoomModal = () => {
+    if (hasDragged) return; // PREVENT ZOOM IF DRAGGED
+
+    if (!showModal) {
+      setZoomLevel(1);
+      setPosition({ x: 0, y: 0 });
+      setShowModal(true);
+    } else {
+      setZoomLevel(prev => (prev >= 6 ? 2 : prev + 0.5));
+    }
+  };
 
   const closeModal = () => {
     setShowModal(false);
-    setZoomLevel(1);
+    setZoomLevel(1.5);
     setPosition({ x: 0, y: 0 });
   };
 
   const startDrag = (e) => {
     setIsDragging(true);
-    setHasDragged(false);
+    setHasDragged(false); // RESET ON NEW DRAG
     setStartPos({ x: e.clientX - position.x, y: e.clientY - position.y });
   };
 
   const duringDrag = (e) => {
     if (isDragging) {
-      setHasDragged(true);
+      setHasDragged(true); // MARK AS DRAGGED
       setPosition({
         x: e.clientX - startPos.x,
         y: e.clientY - startPos.y,
@@ -180,11 +104,16 @@ const openZoomModal = () => {
   const endDrag = () => {
     setIsDragging(false);
   };
+ 
+  const isDiscounted =
+  (product.on_sale === true || product.on_sale === 'true' || product.on_sale === 1 || product.on_sale === '1') &&
+  Number(product.discount_percentage) > 0;
 
-  // Description expand/collapse logic
-  const description = product.description || '';
-  const isLongDesc = description.length > DESC_LIMIT;
-  const descToShow = descExpanded || !isLongDesc ? description : description.slice(0, DESC_LIMIT) + '...';
+const originalPrice = Number(product.price);
+const discount = Number(product.discount_percentage);
+const discountedPrice = isDiscounted
+  ? (originalPrice * (1 - discount / 100)).toFixed(2)
+  : null;
 
   return (
     <div className="min-h-screen bg-white py-24">
@@ -203,26 +132,12 @@ const openZoomModal = () => {
                   />
                 </div>
 
-                <div className="relative w-full max-w-md overflow-hidden rounded-lg shadow-lg border border-gray-300">
-                  <img
-                    src={images[currentImageIndex]}
-                    alt={`Product ${currentImageIndex + 1}`}
-                    onClick={openZoomModal}
-                    className="w-full object-contain cursor-zoom-in"
-                  />
-                </div>
-
                 <div className="flex gap-3 mt-4">
                   {images.map((img, i) => (
                     <img
                       key={i}
                       src={img}
                       alt={`Thumbnail ${i + 1}`}
-                      onClick={() => {
-                        setCurrentImageIndex(i);
-                        setZoomLevel(1.5);
-                        setPosition({ x: 0, y: 0 });
-                      }}
                       onClick={() => {
                         setCurrentImageIndex(i);
                         setZoomLevel(1.5);
@@ -245,58 +160,32 @@ const openZoomModal = () => {
           {/* Product Info */}
           <div>
             <h1 className="text-4xl font-bold mb-4">{product.name}</h1>
-            <p className="text-2xl font-semibold text-gray-700 mb-2">₱{product.price}</p>
+            {isDiscounted ? (
+          <div className="mb-2">
+            <div className="flex items-center gap-2">
+              <span className="text-gray-500 line-through text-lg">₱{originalPrice.toFixed(2)}</span>
+              <span className="text-green-600 font-bold text-2xl">₱{discountedPrice}</span>
+            </div>
+            <span className="text-sm text-red-500 font-semibold">{discount}% OFF</span>
+          </div>
+        ) : (
+          <p className="text-2xl font-semibold text-gray-700 mb-2">₱{originalPrice.toFixed(2)}</p>
+        )}
             <p className={`mb-4 ${inStock ? 'text-green-600' : 'text-red-600'}`}>
               {inStock ? `In stock: ${product.stock}` : 'Out of stock'}
             </p>
-            {/* Improved Description */}
-            <div className="mb-6">
-            <div>
-            {!descExpanded ? (
-              <>
-                {formatDescription(descToShow)}
-                {isLongDesc && (
-                  <button
-                    className="text-primary underline text-xs mt-1 focus:outline-none"
-                    onClick={() => setDescExpanded(true)}
-                  >
-                    Show more
-                  </button>
-                )}
-              </>
-            ) : (
-              // Expanded: show full description in a scrollable box (slider)
-              <div className="relative">
-                <div
-                  className="max-h-64 overflow-y-auto pr-2 border rounded bg-gray-50"
-                  style={{ scrollbarWidth: 'thin' }}
-                >
-                  {formatDescription(description)}
-                </div>
-                <button
-                  className="text-primary underline text-xs mt-2 focus:outline-none"
-                  onClick={() => setDescExpanded(false)}
-                >
-                  Show less
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+            <p className="text-gray-600 mb-6">{product.description}</p>
 
             {inStock && (
               <div className="flex items-center gap-4 mb-8">
                 <span>Quantity:</span>
-                <button onClick={decreaseQuantity} className="bg-gray-200 px-2 rounded">−</button>
                 <button onClick={decreaseQuantity} className="bg-gray-200 px-2 rounded">−</button>
                 <input
                   type="number"
                   value={quantity}
                   onChange={handleQuantityChange}
                   className="w-12 text-center border rounded"
-                  className="w-12 text-center border rounded"
                 />
-                <button onClick={increaseQuantity} className="bg-gray-200 px-2 rounded">+</button>
                 <button onClick={increaseQuantity} className="bg-gray-200 px-2 rounded">+</button>
               </div>
             )}
@@ -314,58 +203,39 @@ const openZoomModal = () => {
       {/* Modal for zoomed image */}
       {showModal && (
         <div
-           ref={modalRef}
           className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
           onMouseMove={duringDrag}
           onMouseUp={endDrag}
           onMouseLeave={endDrag}
-          onClick={closeModal}
         >
-       <div className="absolute top-4 right-4 flex gap-2 z-10">
-      <button
-          onClick={() => {
-            setShowModal(true);
-            setFullscreenRequested(true);
-          }}
-          title="Fullscreen"
-          className="text-white bg-gray-800 rounded-full px-3 py-1 text-sm"
-        >
-          ⛶
-        </button>
-        <button
-          onClick={closeModal}
-          title="Close"
-          className="text-white bg-gray-800 rounded-full px-3 py-1 text-xl"
-        >
-          ✕
-        </button>
-      </div>
-
-         <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-60 px-4 py-2 rounded text-white text-sm z-10">
-          Click and drag to move. Click image to zoom. ⛶ and click the image again to go fullscreen.
-        </div>
-          <div
-            onClick={(e) => e.stopPropagation()} // prevents outer click close
-            className="relative max-w-[95%] max-h-[95%] flex items-center justify-center"
-          >
-       <img
-              ref={imgRef}
-              src={images[currentImageIndex]}
-              alt="Zoomed Product"
-              onMouseDown={startDrag}
-              onClick={openZoomModal}
-              style={{
-                transform: `scale(${zoomLevel}) translate(${position.x / zoomLevel}px, ${position.y / zoomLevel}px)`,
-                cursor: isDragging ? 'grabbing' : 'zoom-in',
-                transition: isDragging ? 'none' : 'transform 0.3s ease',
-                transformOrigin: 'center',
-                imageRendering: 'auto', // <-- Use this for better compression rendering
-                maxWidth: '100%',
-                maxHeight: '100%',
-              }}
-              className="max-h-[90%] max-w-[90%] object-contain shadow-lg rounded border border-gray-200 bg-white"
-            />
+          <div className="absolute top-4 right-4">
+            <button
+              onClick={closeModal}
+              className="text-white text-xl bg-gray-800 rounded-full px-3 py-1"
+            >
+              ✕
+            </button>
           </div>
+
+          <div className="absolute bottom-4 text-center w-full text-white text-sm pointer-events-none">
+            Click and hold to drag image. Click again to zoom in.
+          </div>
+
+          <img
+            ref={imgRef}
+            src={images[currentImageIndex]}
+            alt="Zoomed Product"
+            onMouseDown={startDrag}
+            onClick={openZoomModal}
+            style={{
+              transform: `scale(${zoomLevel}) translate(${position.x / zoomLevel}px, ${position.y / zoomLevel}px)`,
+              cursor: isDragging ? 'grabbing' : 'zoom-in',
+              transition: isDragging ? 'none' : 'transform 0.3s ease',
+              transformOrigin: 'center',
+            }}
+            className="max-h-[90%] max-w-[90%] object-contain"
+            draggable={false}
+          />
         </div>
       )}
     </div>

@@ -52,41 +52,6 @@ function CartPage() {
     setRemoveQuantities(newRemoveQuantities);
   };
 
-  const handleBuyNow = () => {
-    if (cartItems.length === 0) {
-      alert("Your cart is empty.");
-      return;
-    }
-    setShowModal(true);
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setCheckoutData({ ...checkoutData, [name]: value });
-  };
-
-  const handleConfirmCheckout = async () => {
-    try {
-      const payload = {
-        ...checkoutData,
-        cart: cartItems,
-        total: total.toFixed(2),
-      };
-
-      const response = await api.post('/apiorders', payload);
-
-      if (response.status === 200 || response.status === 201) {
-        alert("Order placed successfully!");
-        localStorage.removeItem('cart');
-        setCartItems([]);
-        setShowModal(false);
-      }
-    } catch (error) {
-      console.error("Checkout error:", error);
-      alert("Failed to place order. Please try again.");
-    }
-  };
-
   const getSubtotal = () =>
     cartItems.reduce(
       (sum, item) => sum + parseFloat(item.price.replace('₱', '')) * item.quantity,
@@ -169,8 +134,7 @@ function CartPage() {
                       <p className="text-gray-500 mt-1">Unit Price: ₱{item.price.replace('₱', '')}</p>
                       <p className="text-gray-500 mt-1">Quantity: {item.quantity}</p>
                       <p className="font-bold mt-2 text-lg">
-                        Total: ₱
-                        {(parseFloat(item.price.replace('₱', '')) * item.quantity).toFixed(2)}
+                        Total: ₱{(parseFloat(item.price.replace('₱', '')) * item.quantity).toFixed(2)}
                       </p>
                     </div>
                     <div className="flex flex-col items-center justify-center gap-3 px-4">
@@ -262,64 +226,6 @@ function CartPage() {
           </div>
         </div>
       </div>
-
-      {/* Checkout Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">Checkout Information</h2>
-
-            <div className="space-y-3">
-              <input
-                type="email"
-                name="email"
-                placeholder="Email"
-                value={checkoutData.email}
-                onChange={handleChange}
-                className="w-full border px-3 py-2 rounded"
-              />
-              <input
-                type="tel"
-                name="phone"
-                placeholder="Phone Number"
-                value={checkoutData.phone}
-                onChange={handleChange}
-                className="w-full border px-3 py-2 rounded"
-              />
-              <textarea
-                name="location"
-                placeholder="Delivery Address"
-                value={checkoutData.location}
-                onChange={handleChange}
-                className="w-full border px-3 py-2 rounded"
-              />
-              <select
-                name="deliveryOption"
-                value={checkoutData.deliveryOption}
-                onChange={handleChange}
-                className="w-full border px-3 py-2 rounded"
-              >
-                <option value="COD">Cash on Delivery (COD)</option>
-              </select>
-            </div>
-
-            <div className="mt-6 flex justify-end gap-2">
-              <button
-                onClick={() => setShowModal(false)}
-                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirmCheckout}
-                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-              >
-                Confirm Order
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
