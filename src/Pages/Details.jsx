@@ -15,7 +15,9 @@ function ProductDetails() {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
-  const [hasDragged, setHasDragged] = useState(false); // NEW
+  const [hasDragged, setHasDragged] = useState(false);
+  const [showFullDescription, setShowFullDescription] = useState(false);
+  const DESCRIPTION_LIMIT = 300; 
   
 
   const imgRef = useRef(null);
@@ -59,7 +61,7 @@ function ProductDetails() {
         id: product.id,
         name: product.name,
         price: product.price,
-        image: images[0] || '',
+         images: images,
         quantity,
       });
     }
@@ -174,7 +176,28 @@ const discountedPrice = isDiscounted
             <p className={`mb-4 ${inStock ? 'text-green-600' : 'text-red-600'}`}>
               {inStock ? `In stock: ${product.stock}` : 'Out of stock'}
             </p>
-            <p className="text-gray-600 mb-6">{product.description}</p>
+            {product.description.length > DESCRIPTION_LIMIT ? (
+        <div className="mb-6">
+        <div
+          className={`text-gray-600 whitespace-pre-line ${
+              showFullDescription ? 'max-h-60 overflow-y-auto border-2 border-gray-300 rounded p-3' : ''
+          }`}
+        >
+          {showFullDescription
+            ? product.description
+            : `${product.description.slice(0, DESCRIPTION_LIMIT)}...`}
+        </div>
+        <button
+          onClick={() => setShowFullDescription(!showFullDescription)}
+          className="mt-2 text-blue-600 underline"
+        >
+          {showFullDescription ? 'Show Less' : 'Show More'}
+        </button>
+      </div>
+          ) : (
+            <p className="text-gray-600 mb-6 whitespace-pre-line">{product.description}</p>
+          )}
+
 
             {inStock && (
               <div className="flex items-center gap-4 mb-8">
