@@ -11,6 +11,9 @@ function CartPage() {
     deliveryOption: 'Cash on Delivery',
   });
   const [voucherCode, setVoucherCode] = useState('');
+  const [voucherError, setVoucherError] = useState('');
+  const [isVoucherValid, setIsVoucherValid] = useState(true);
+  const [voucherAmount, setVoucherAmount] = useState(0); // NEW
 
   useEffect(() => {
     const cartData = JSON.parse(localStorage.getItem('cart')) || [];
@@ -62,48 +65,80 @@ function CartPage() {
   const subtotal = getSubtotal();
   const taxRate = 0.10;
   const tax = subtotal * taxRate;
-  const total = subtotal + tax;
+  const grandTotal = subtotal + tax;
+  const discountedTotal = Math.max(grandTotal - voucherAmount, 0);
+
+  useEffect(() => {
+    const validateVoucher = async () => {
+      if (!voucherCode.trim()) {
+        setVoucherError('');
+        setIsVoucherValid(true);
+        setVoucherAmount(0);
+        return;
+      }
+
+      try {
+        const res = await axios.get(`http://localhost:8000/api/validate-voucher?code=${voucherCode}`);
+        if (res.data.valid) {
+          setVoucherError('');
+          setIsVoucherValid(true);
+          setVoucherAmount(res.data.discount_amount || 0);
+        } else {
+          setVoucherError('Voucher code does not exist or has been used.');
+          setIsVoucherValid(false);
+          setVoucherAmount(0);
+        }
+      } catch (error) {
+        setVoucherError('Voucher code does not exist or has been used.');
+        setIsVoucherValid(false);
+        setVoucherAmount(0);
+      }
+    };
+
+    validateVoucher();
+  }, [voucherCode]);
 
   const handleCheckoutChange = (e) => {
     setCheckoutData({ ...checkoutData, [e.target.name]: e.target.value });
   };
 
   const handleCheckoutSubmit = async () => {
-    try {
- const payload = {
-  email: checkoutData.email,
-  phone: checkoutData.phone,
-  location: checkoutData.location,
-  deliveryOption: checkoutData.deliveryOption,
-  total: total.toFixed(2),
-  cart: cartItems.map((item) => ({
-    id: item.id,
-    name: item.name,
-    quantity: item.quantity,
-    price: parseFloat(item.price.replace('₱', '')),
-  })),
-  voucher: voucherCode, // <-- add this line
-};
+    if (!isVoucherValid) {
+      alert("Cannot proceed: invalid voucher code.");
+      return;
+    }
 
+    try {
+      const payload = {
+        email: checkoutData.email,
+        phone: checkoutData.phone,
+        location: checkoutData.location,
+        deliveryOption: checkoutData.deliveryOption,
+        total: grandTotal.toFixed(2), // Original total without discount
+        discounted_total: discountedTotal.toFixed(2),
+        cart: cartItems.map((item) => ({
+          id: item.id,
+          name: item.name,
+          quantity: item.quantity,
+          price: parseFloat(item.price.replace('₱', '')),
+        })),
+        voucher: voucherCode,
+      };
 
       await axios.post("http://localhost:8000/api/apiorders", payload);
 
       alert("Order placed successfully!");
       localStorage.removeItem("cart");
       setCartItems([]);
-   } catch (error) {
-  if (error.response && error.response.status === 422) {
-    console.error("Validation error:", error.response.data.errors);
-    alert(
-      "Validation error:\n" +
-        JSON.stringify(error.response.data.errors, null, 2)
-    );
-  } else {
-    console.error("Checkout error:", error);
-    alert("Something went wrong during checkout.");
-  }
-}
-
+    } catch (error) {
+      if (error.response && error.response.status === 422) {
+        console.error("Validation error:", error.response.data.errors);
+        alert("Validation error:\n" + JSON.stringify(error.response.data.errors, null, 2));
+      } else {
+        console.error("Checkout error:", error);
+        alert("Something went wrong during checkout.");
+      }
+    }
   };
 
   return (
@@ -175,13 +210,24 @@ function CartPage() {
                 <span>Tax (10%):</span>
                 <span>₱{tax.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between font-bold text-lg border-t pt-3">
-                <span>Total:</span>
-                <span className="text-green-600">₱{total.toFixed(2)}</span>
+              <div className="flex justify-between font-bold border-t pt-3">
+                <span>Grand Total:</span>
+                <span className="text-gray-900">₱{grandTotal.toFixed(2)}</span>
               </div>
+              {voucherAmount > 0 && (
+                <>
+                  <div className="flex justify-between text-green-700 font-medium">
+                    <span>Voucher Discount:</span>
+                    <span>- ₱{voucherAmount.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between font-bold text-lg border-t pt-3 text-green-700">
+                    <span>Discounted Total:</span>
+                    <span>₱{discountedTotal.toFixed(2)}</span>
+                  </div>
+                </>
+              )}
             </div>
 
-            {/* Checkout Form */}
             <div className="space-y-2 pt-4">
               <input
                 type="email"
@@ -218,13 +264,16 @@ function CartPage() {
               </select>
 
               <input
-              type="text"
-              name="voucher"
-              placeholder="Voucher Code"
-              value={voucherCode}
-              onChange={e => setVoucherCode(e.target.value)}
-              className="w-full px-3 py-2 border rounded"
-            />
+                type="text"
+                name="voucher"
+                placeholder="Voucher Code"
+                value={voucherCode}
+                onChange={e => setVoucherCode(e.target.value)}
+                className={`w-full px-3 py-2 border rounded ${!isVoucherValid ? 'border-red-500' : ''}`}
+              />
+              {!isVoucherValid && (
+                <p className="text-sm text-red-600 mt-1">{voucherError}</p>
+              )}
             </div>
 
             <button
