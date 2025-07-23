@@ -57,15 +57,19 @@ function CartPage() {
   };
 
   const getSubtotal = () =>
-    cartItems.reduce(
-      (sum, item) => sum + parseFloat(item.price.replace('₱', '')) * item.quantity,
-      0
-    );
+  cartItems.reduce((sum, item) => {
+    const originalPrice = parseFloat(item.price.replace('₱', ''));
+    const discount = item.discount_percentage || 0;
+    const finalPrice = discount > 0 ? originalPrice * (1 - discount / 100) : originalPrice;
+    return sum + finalPrice * item.quantity;
+  }, 0);
+
 
   const subtotal = getSubtotal();
-  const taxRate = 0.10;
-  const tax = subtotal * taxRate;
-  const grandTotal = subtotal + tax;
+  //const taxRate = 0.10;
+  //const tax = subtotal * taxRate;
+ // const grandTotal = subtotal + tax;
+  const grandTotal = subtotal;
   const discountedTotal = Math.max(grandTotal - voucherAmount, 0);
 
   useEffect(() => {
@@ -120,7 +124,9 @@ function CartPage() {
           id: item.id,
           name: item.name,
           quantity: item.quantity,
-          price: parseFloat(item.price.replace('₱', '')),
+          price: item.discount_percentage > 0
+      ? parseFloat(item.price.replace('₱', '')) * (1 - item.discount_percentage / 100)
+      : parseFloat(item.price.replace('₱', '')),
         })),
         voucher: voucherCode,
       };
@@ -168,10 +174,24 @@ function CartPage() {
                     />
                     <div className="flex-1 p-4">
                       <h2 className="text-xl font-semibold text-gray-800">{item.name}</h2>
-                      <p className="text-gray-500 mt-1">Unit Price: ₱{item.price.replace('₱', '')}</p>
+                      {item.discount_percentage > 0 ? (
+                        <p className="text-gray-500 mt-1">
+                          Unit Price:
+                          <span className="line-through text-red-400 ml-1">₱{item.price.replace('₱', '')}</span>
+                          <span className="ml-2 text-green-600 font-semibold">
+                            ₱{(parseFloat(item.price.replace('₱', '')) * (1 - item.discount_percentage / 100)).toFixed(2)}
+                          </span>
+                        </p>
+                      ) : (
+                        <p className="text-gray-500 mt-1">Unit Price: ₱{item.price.replace('₱', '')}</p>
+                      )}
                       <p className="text-gray-500 mt-1">Quantity: {item.quantity}</p>
                       <p className="font-bold mt-2 text-lg">
-                        Total: ₱{(parseFloat(item.price.replace('₱', '')) * item.quantity).toFixed(2)}
+                        Total: ₱{(
+                          (item.discount_percentage > 0
+                            ? parseFloat(item.price.replace('₱', '')) * (1 - item.discount_percentage / 100)
+                            : parseFloat(item.price.replace('₱', ''))) * item.quantity
+                        ).toFixed(2)}
                       </p>
                     </div>
                     <div className="flex flex-col items-center justify-center gap-3 px-4">
@@ -206,10 +226,10 @@ function CartPage() {
                 <span>Subtotal:</span>
                 <span>₱{subtotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-gray-700">
+              {/*<div className="flex justify-between text-gray-700">
                 <span>Tax (10%):</span>
                 <span>₱{tax.toFixed(2)}</span>
-              </div>
+              </div>*/}
               <div className="flex justify-between font-bold border-t pt-3">
                 <span>Grand Total:</span>
                 <span className="text-gray-900">₱{grandTotal.toFixed(2)}</span>
