@@ -75,7 +75,7 @@ const CARD_HEIGHT = 360;
  useEffect(() => {
   const fetchProducts = async () => {
     try {
-      const res = await api.get('/', {
+      const res = await api.get('http://localhost:8000/api/apiproducts', {
         params: {
           sort: sortOption,
           page: currentPage,
@@ -407,6 +407,8 @@ const handleSignUp = () => {
             id={product.id}
             name={product.name}
             price={product.price}
+            on_sale={product.on_sale} 
+            discount_percentage={product.discount_percentage}  // ✅ PASS THIS INSTEAD
             description={product.description}
             images={product.images}
             isFavorite={favorites.includes(product.name)}

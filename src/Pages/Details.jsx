@@ -15,7 +15,10 @@ function ProductDetails() {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
-  const [hasDragged, setHasDragged] = useState(false); // NEW
+  const [hasDragged, setHasDragged] = useState(false);
+  const [showFullDescription, setShowFullDescription] = useState(false);
+  const DESCRIPTION_LIMIT = 300; 
+  
 
   const imgRef = useRef(null);
 
@@ -58,7 +61,7 @@ function ProductDetails() {
         id: product.id,
         name: product.name,
         price: product.price,
-        image: images[0] || '',
+         images: images,
         quantity,
       });
     }
@@ -103,6 +106,16 @@ function ProductDetails() {
   const endDrag = () => {
     setIsDragging(false);
   };
+ 
+  const isDiscounted =
+  (product.on_sale === true || product.on_sale === 'true' || product.on_sale === 1 || product.on_sale === '1') &&
+  Number(product.discount_percentage) > 0;
+
+const originalPrice = Number(product.price);
+const discount = Number(product.discount_percentage);
+const discountedPrice = isDiscounted
+  ? (originalPrice * (1 - discount / 100)).toFixed(2)
+  : null;
 
   return (
     <div className="min-h-screen bg-white py-24">
@@ -149,11 +162,42 @@ function ProductDetails() {
           {/* Product Info */}
           <div>
             <h1 className="text-4xl font-bold mb-4">{product.name}</h1>
-            <p className="text-2xl font-semibold text-gray-700 mb-2">₱{product.price}</p>
+            {isDiscounted ? (
+          <div className="mb-2">
+            <div className="flex items-center gap-2">
+              <span className="text-gray-500 line-through text-lg">₱{originalPrice.toFixed(2)}</span>
+              <span className="text-green-600 font-bold text-2xl">₱{discountedPrice}</span>
+            </div>
+            <span className="text-sm text-red-500 font-semibold">{discount}% OFF</span>
+          </div>
+        ) : (
+          <p className="text-2xl font-semibold text-gray-700 mb-2">₱{originalPrice.toFixed(2)}</p>
+        )}
             <p className={`mb-4 ${inStock ? 'text-green-600' : 'text-red-600'}`}>
               {inStock ? `In stock: ${product.stock}` : 'Out of stock'}
             </p>
-            <p className="text-gray-600 mb-6">{product.description}</p>
+            {product.description.length > DESCRIPTION_LIMIT ? (
+        <div className="mb-6">
+        <div
+          className={`text-gray-600 whitespace-pre-line ${
+              showFullDescription ? 'max-h-60 overflow-y-auto border-2 border-gray-300 rounded p-3' : ''
+          }`}
+        >
+          {showFullDescription
+            ? product.description
+            : `${product.description.slice(0, DESCRIPTION_LIMIT)}...`}
+        </div>
+        <button
+          onClick={() => setShowFullDescription(!showFullDescription)}
+          className="mt-2 text-blue-600 underline"
+        >
+          {showFullDescription ? 'Show Less' : 'Show More'}
+        </button>
+      </div>
+          ) : (
+            <p className="text-gray-600 mb-6 whitespace-pre-line">{product.description}</p>
+          )}
+
 
             {inStock && (
               <div className="flex items-center gap-4 mb-8">

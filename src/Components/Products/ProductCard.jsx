@@ -1,7 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
-function ProductCard({ name, price, id, images, isFavorite, toggleFavorite, onAddToCart, isOutOfStock }) {
+function ProductCard({
+  name,
+  price,
+  id,
+  images,
+  isFavorite,
+  toggleFavorite,
+  onAddToCart,
+  isOutOfStock,
+  on_sale = false,
+  discount_percentage = 0,
+}) {
   const imagesList = Array.isArray(images)
     ? images
     : typeof images === 'string'
@@ -27,13 +38,25 @@ function ProductCard({ name, price, id, images, isFavorite, toggleFavorite, onAd
     return () => clearInterval(intervalRef.current);
   }, []);
 
+  // Normalize and validate values
+const isDiscounted =
+  (on_sale === true || on_sale === 'true' || on_sale === 1 || on_sale === '1') &&
+  Number(discount_percentage) > 0;
+
+const originalPrice = Number(price);
+const discount = Number(discount_percentage);
+const discountedPrice = isDiscounted
+  ? (originalPrice * (1 - discount / 100)).toFixed(2)
+  : null;
+
+    
+
   return (
     <div
       className="flex flex-col bg-white border border-gray-200 rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 max-w-60 min-h-[340px] relative group overflow-hidden"
       onMouseEnter={startCycling}
       onMouseLeave={stopCycling}
     >
-
       {/* Favorite Button */}
       <button
         onClick={(e) => {
@@ -41,7 +64,7 @@ function ProductCard({ name, price, id, images, isFavorite, toggleFavorite, onAd
           toggleFavorite();
         }}
         type="button"
-        className="absolute top-3 right-3 z-20 focus:outline-none bg-white rounded-full p-1.5 shadow-sm border border-gray-200"
+        className="absolute top-3 right-3 z-20 bg-white rounded-full p-1.5 shadow-sm border border-gray-200"
         title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
       >
         <svg
@@ -49,7 +72,7 @@ function ProductCard({ name, price, id, images, isFavorite, toggleFavorite, onAd
           fill={isFavorite ? "#FF3B30" : "none"}
           viewBox="0 0 24 24"
           stroke="#FF3B30"
-          className={`w-6 h-6 transition-colors duration-200 ${isFavorite ? 'scale-100' : 'group-hover:scale-110'}`}
+          className={`w-6 h-6 transition-transform duration-200 ${isFavorite ? 'scale-100' : 'group-hover:scale-110'}`}
         >
           <path
             strokeLinecap="round"
@@ -60,22 +83,21 @@ function ProductCard({ name, price, id, images, isFavorite, toggleFavorite, onAd
         </svg>
       </button>
 
-     <Link to={`/details/${id}`} className="flex flex-col items-center flex-1 px-4 pt-5 pb-3 group relative z-10">
-        <div className="relative w-24 h-24 flex items-center justify-center rounded-lg bg-gray-50 border border-gray-100 mb-3 mt-6 overflow-hidden z-10">
-          {/* Product Images */}
+      <Link to={`/details/${id}`} className="flex flex-col items-center flex-1 px-4 pt-5 pb-3 group relative z-10">
+        <div className="relative w-24 h-24 flex items-center justify-center rounded-lg bg-gray-50 border border-gray-100 mb-3 mt-6 overflow-hidden">
           {imagesList.map((img, index) => (
             <img
               key={index}
               src={img}
               alt={name}
-              className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-700 ease-in-out
-                ${index === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'}
-              `}
+              className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-700 ease-in-out ${
+                index === currentIndex ? 'opacity-100' : 'opacity-0'
+              }`}
               loading="lazy"
-              style={{ zIndex: 2 }}
             />
           ))}
         </div>
+
         {/* Product Name */}
         <div className="w-full mt-12 text-center">
           <span
@@ -85,15 +107,35 @@ function ProductCard({ name, price, id, images, isFavorite, toggleFavorite, onAd
             {name}
           </span>
         </div>
-        {/* Price */}
+
+        {/* Price Section */}
         <div className="w-full mt-4 text-center">
-          <span className="text-lg font-bold text-primary">₱{price}</span>
+          {isDiscounted ? (
+            <>
+              <div className="flex justify-center items-center gap-2">
+                <span className="text-gray-500 line-through text-sm">
+                  ₱{originalPrice.toFixed(2)}
+                </span>
+                <span className="text-green-600 font-semibold text-lg">
+                  ₱{discountedPrice}
+                </span>
+              </div>
+              <span className="text-xs text-red-500 font-medium block mt-1">
+                {discount}% OFF
+              </span>
+            </>
+          ) : (
+            <span className="text-lg font-bold text-primary">
+              ₱{originalPrice.toFixed(2)}
+            </span>
+          )}
         </div>
       </Link>
 
       {/* Add to Cart Button */}
-      <div className="px-4 pb-4 mt-auto z-10">
+      <div className="px-4 pb-4 mt-auto">
         <button
+          type="button"
           className="w-full bg-primary text-white font-semibold py-2 rounded-lg shadow hover:bg-yellow-500 transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
           onClick={(e) => {
             e.preventDefault();

@@ -1,16 +1,33 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from "../Data/axios"; // Make sure path is correct
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log({ email, password });
-    alert("Logged in!");
-    navigate('/');
+    
+    try {
+      const response = await api.post('/apiusers/login', {
+        email,
+        password
+      });
+
+      if (response.status === 200) {
+        alert("Logged in successfully!");
+        // Optionally: save user info or token in localStorage
+        // localStorage.setItem("user", JSON.stringify(response.data));
+        navigate('/');
+      } else {
+        alert("Invalid credentials!");
+      }
+    } catch (error) {
+      console.error("Login error:", error.response?.data || error.message);
+      alert("Login failed. Please check your credentials.");
+    }
   };
 
   const handleBackToProducts = () => {
@@ -42,7 +59,6 @@ const Login = () => {
         </button>
       </form>
 
-      {/* Return to Products Button */}
       <button
         onClick={handleBackToProducts}
         className="mt-4 text-sm text-blue-600 hover:underline"

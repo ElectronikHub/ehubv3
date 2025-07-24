@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import api from "../Data/axios"; // Axios instance with baseURL = http://localhost:8000/api
 import { useNavigate } from 'react-router-dom';
 
 const Signup = () => {
@@ -7,12 +8,23 @@ const Signup = () => {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Replace with actual API signup call
-    console.log({ name, email, password });
-    alert("Account created!");
-    navigate('/login');
+
+    try {
+      const response = await api.post("/apiusers", {
+        name,
+        email,
+        password
+      });
+
+      alert("Account created successfully!");
+      console.log(response.data);
+      navigate('/login');
+    } catch (error) {
+      console.error("Signup failed:", error.response?.data || error.message);
+      alert("Failed to create account. Please try again.");
+    }
   };
 
   const handleBackToProducts = () => {
@@ -52,7 +64,6 @@ const Signup = () => {
         </button>
       </form>
 
-      {/* Return to Products Button */}
       <button
         onClick={handleBackToProducts}
         className="mt-4 text-sm text-blue-600 hover:underline"

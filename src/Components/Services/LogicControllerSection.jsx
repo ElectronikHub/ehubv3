@@ -54,18 +54,29 @@ function ServiceCard({ service }) {
         transition={{ delay: 0.4, duration: 1, ease: "easeOut" }}
         viewport={{ once: true }}
       >
-        <video
-          src="/Assets/Logic.mp4"
-          className="w-full h-full object-cover rounded-2xl"
-          muted
-          loop
-          playsInline
-          onMouseEnter={(e) => e.currentTarget.play()}
-          onMouseLeave={(e) => {
-            e.currentTarget.pause();
-            e.currentTarget.currentTime = 0;
-          }}
-        />
+      <video
+  src="/Assets/Logic.mp4"
+  className="w-full h-full object-cover rounded-2xl"
+  muted
+  loop
+  playsInline
+  onMouseEnter={(e) => {
+    const video = e.currentTarget;
+    if (video.paused) {
+      video.play().catch((err) => {
+        console.error("Play error:", err);
+      });
+    }
+  }}
+  onMouseLeave={(e) => {
+    const video = e.currentTarget;
+    // Add slight delay to ensure play isn't immediately interrupted
+    setTimeout(() => {
+      video.pause();
+      video.currentTime = 0;
+    }, 150); // 150ms debounce
+  }}
+/>
       </motion.div>
     </motion.div>
   );

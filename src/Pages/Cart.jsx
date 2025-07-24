@@ -1,8 +1,19 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
 function CartPage() {
   const [cartItems, setCartItems] = useState([]);
   const [removeQuantities, setRemoveQuantities] = useState({});
+  const [checkoutData, setCheckoutData] = useState({
+    email: '',
+    phone: '',
+    location: '',
+    deliveryOption: 'Cash on Delivery',
+  });
+  const [voucherCode, setVoucherCode] = useState('');
+  const [voucherError, setVoucherError] = useState('');
+  const [isVoucherValid, setIsVoucherValid] = useState(true);
+  const [voucherAmount, setVoucherAmount] = useState(0); // NEW
 
   useEffect(() => {
     const cartData = JSON.parse(localStorage.getItem('cart')) || [];
@@ -28,10 +39,7 @@ function CartPage() {
 
     const updatedCart = [...cartItems];
     if (updatedCart[indexToRemove].quantity > amountToRemove) {
-      updatedCart[indexToRemove] = {
-        ...updatedCart[indexToRemove],
-        quantity: updatedCart[indexToRemove].quantity - amountToRemove,
-      };
+      updatedCart[indexToRemove].quantity -= amountToRemove;
     } else {
       updatedCart.splice(indexToRemove, 1);
     }
@@ -48,25 +56,96 @@ function CartPage() {
     setRemoveQuantities(newRemoveQuantities);
   };
 
-  const handleBuyNow = () => {
-    if (cartItems.length === 0) {
-      alert("Your cart is empty.");
+  const getSubtotal = () =>
+  cartItems.reduce((sum, item) => {
+    const originalPrice = parseFloat(item.price.replace('₱', ''));
+    const discount = item.discount_percentage || 0;
+    const finalPrice = discount > 0 ? originalPrice * (1 - discount / 100) : originalPrice;
+    return sum + finalPrice * item.quantity;
+  }, 0);
+
+
+  const subtotal = getSubtotal();
+  //const taxRate = 0.10;
+  //const tax = subtotal * taxRate;
+ // const grandTotal = subtotal + tax;
+  const grandTotal = subtotal;
+  const discountedTotal = Math.max(grandTotal - voucherAmount, 0);
+
+  useEffect(() => {
+    const validateVoucher = async () => {
+      if (!voucherCode.trim()) {
+        setVoucherError('');
+        setIsVoucherValid(true);
+        setVoucherAmount(0);
+        return;
+      }
+
+      try {
+        const res = await axios.get(`http://localhost:8000/api/validate-voucher?code=${voucherCode}`);
+        if (res.data.valid) {
+          setVoucherError('');
+          setIsVoucherValid(true);
+          setVoucherAmount(res.data.discount_amount || 0);
+        } else {
+          setVoucherError('Voucher code does not exist or has been used.');
+          setIsVoucherValid(false);
+          setVoucherAmount(0);
+        }
+      } catch (error) {
+        setVoucherError('Voucher code does not exist or has been used.');
+        setIsVoucherValid(false);
+        setVoucherAmount(0);
+      }
+    };
+
+    validateVoucher();
+  }, [voucherCode]);
+
+  const handleCheckoutChange = (e) => {
+    setCheckoutData({ ...checkoutData, [e.target.name]: e.target.value });
+  };
+
+  const handleCheckoutSubmit = async () => {
+    if (!isVoucherValid) {
+      alert("Cannot proceed: invalid voucher code.");
       return;
     }
 
-    alert("Proceeding to checkout..."); // Replace with real checkout logic or redirect
+    try {
+      const payload = {
+        email: checkoutData.email,
+        phone: checkoutData.phone,
+        location: checkoutData.location,
+        deliveryOption: checkoutData.deliveryOption,
+        total: grandTotal.toFixed(2), // Original total without discount
+        discounted_total: discountedTotal.toFixed(2),
+        cart: cartItems.map((item) => ({
+          id: item.id,
+          name: item.name,
+          quantity: item.quantity,
+          price: item.discount_percentage > 0
+      ? parseFloat(item.price.replace('₱', '')) * (1 - item.discount_percentage / 100)
+      : parseFloat(item.price.replace('₱', '')),
+        })),
+        voucher: voucherCode,
+      };
+
+      await axios.post("http://localhost:8000/api/apiorders", payload);
+
+      alert("Order placed successfully!");
+      localStorage.removeItem("cart");
+      setCartItems([]);
+    } catch (error) {
+      if (error.response && error.response.status === 422) {
+        console.error("Validation error:", error.response.data.errors);
+        alert("Validation error:\n" + JSON.stringify(error.response.data.errors, null, 2));
+      } else {
+        console.error("Checkout error:", error);
+        alert("Something went wrong during checkout.");
+      }
+    }
   };
-
-  const getSubtotal = () =>
-    cartItems.reduce(
-      (sum, item) => sum + parseFloat(item.price.replace('₱', '')) * item.quantity,
-      0
-    );
-
-  const subtotal = getSubtotal();
-  const taxRate = 0.10;
-  const tax = subtotal * taxRate;
-  const total = subtotal + tax;
 
   return (
     <div className="min-h-screen pt-32 bg-gray-50">
@@ -81,10 +160,7 @@ function CartPage() {
             ) : (
               <div className="space-y-6">
                 {cartItems.map((item, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center bg-white rounded-lg shadow overflow-hidden"
-                  >
+                  <div key={index} className="flex items-center bg-white rounded-lg shadow overflow-hidden">
                     <img
                       src={
                         Array.isArray(item.images)
@@ -98,24 +174,29 @@ function CartPage() {
                     />
                     <div className="flex-1 p-4">
                       <h2 className="text-xl font-semibold text-gray-800">{item.name}</h2>
-                      <p className="text-gray-500 mt-1">
-                        Unit Price: ₱{item.price.replace('₱', '')}
-                      </p>
+                      {item.discount_percentage > 0 ? (
+                        <p className="text-gray-500 mt-1">
+                          Unit Price:
+                          <span className="line-through text-red-400 ml-1">₱{item.price.replace('₱', '')}</span>
+                          <span className="ml-2 text-green-600 font-semibold">
+                            ₱{(parseFloat(item.price.replace('₱', '')) * (1 - item.discount_percentage / 100)).toFixed(2)}
+                          </span>
+                        </p>
+                      ) : (
+                        <p className="text-gray-500 mt-1">Unit Price: ₱{item.price.replace('₱', '')}</p>
+                      )}
                       <p className="text-gray-500 mt-1">Quantity: {item.quantity}</p>
                       <p className="font-bold mt-2 text-lg">
-                        Total: ₱
-                        {(parseFloat(item.price.replace('₱', '')) * item.quantity).toFixed(2)}
+                        Total: ₱{(
+                          (item.discount_percentage > 0
+                            ? parseFloat(item.price.replace('₱', '')) * (1 - item.discount_percentage / 100)
+                            : parseFloat(item.price.replace('₱', ''))) * item.quantity
+                        ).toFixed(2)}
                       </p>
                     </div>
                     <div className="flex flex-col items-center justify-center gap-3 px-4">
-                      <label
-                        htmlFor={`remove-qty-${index}`}
-                        className="text-sm font-medium text-gray-600"
-                      >
-                        Remove Qty
-                      </label>
+                      <label className="text-sm font-medium text-gray-600">Remove Qty</label>
                       <input
-                        id={`remove-qty-${index}`}
                         type="number"
                         min="1"
                         max={item.quantity}
@@ -136,30 +217,91 @@ function CartPage() {
             )}
           </div>
 
-          {/* Summary */}
-          <div className="w-full md:w-96 bg-white rounded-lg shadow p-6 animate-fade-in">
-            <h2 className="text-xl font-extrabold text-center mb-6 border-b pb-3">Summary</h2>
-            <div className="space-y-4">
+          {/* Checkout Summary */}
+          <div className="w-full md:w-96 bg-white rounded-lg shadow p-6 space-y-4">
+            <h2 className="text-xl font-extrabold text-center mb-4 border-b pb-3">Summary</h2>
+
+            <div className="space-y-2">
               <div className="flex justify-between text-gray-700">
                 <span>Subtotal:</span>
                 <span>₱{subtotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-gray-700">
+              {/*<div className="flex justify-between text-gray-700">
                 <span>Tax (10%):</span>
                 <span>₱{tax.toFixed(2)}</span>
+              </div>*/}
+              <div className="flex justify-between font-bold border-t pt-3">
+                <span>Grand Total:</span>
+                <span className="text-gray-900">₱{grandTotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between font-bold text-lg border-t pt-3">
-                <span>Total:</span>
-                <span className="text-green-600">₱{total.toFixed(2)}</span>
-              </div>
+              {voucherAmount > 0 && (
+                <>
+                  <div className="flex justify-between text-green-700 font-medium">
+                    <span>Voucher Discount:</span>
+                    <span>- ₱{voucherAmount.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between font-bold text-lg border-t pt-3 text-green-700">
+                    <span>Discounted Total:</span>
+                    <span>₱{discountedTotal.toFixed(2)}</span>
+                  </div>
+                </>
+              )}
             </div>
 
-            {/* Buy Now Button */}
+            <div className="space-y-2 pt-4">
+              <input
+                type="email"
+                name="email"
+                placeholder="Email"
+                value={checkoutData.email}
+                onChange={handleCheckoutChange}
+                className="w-full px-3 py-2 border rounded"
+              />
+              <input
+                type="text"
+                name="phone"
+                placeholder="Phone"
+                value={checkoutData.phone}
+                onChange={handleCheckoutChange}
+                className="w-full px-3 py-2 border rounded"
+              />
+              <input
+                type="text"
+                name="location"
+                placeholder="Location"
+                value={checkoutData.location}
+                onChange={handleCheckoutChange}
+                className="w-full px-3 py-2 border rounded"
+              />
+              <select
+                name="deliveryOption"
+                value={checkoutData.deliveryOption}
+                onChange={handleCheckoutChange}
+                className="w-full px-3 py-2 border rounded"
+              >
+                <option value="Cash on Delivery">Cash on Delivery</option>
+                <option value="Pickup">Pickup</option>
+              </select>
+
+              <input
+                type="text"
+                name="voucher"
+                placeholder="Voucher Code"
+                value={voucherCode}
+                onChange={e => setVoucherCode(e.target.value)}
+                className={`w-full px-3 py-2 border rounded ${!isVoucherValid ? 'border-red-500' : ''}`}
+              />
+              {!isVoucherValid && (
+                <p className="text-sm text-red-600 mt-1">{voucherError}</p>
+              )}
+            </div>
+
             <button
-              onClick={handleBuyNow}
-              className="w-full mt-6 py-3 px-6 bg-green-600 text-white font-bold rounded-lg shadow-lg hover:bg-green-700 transition duration-300 ease-in-out animate-fade-in"
+              onClick={handleCheckoutSubmit}
+              className="w-full mt-4 py-3 px-6 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg"
+              disabled={cartItems.length === 0}
             >
-              Buy Now
+              Place Order
             </button>
           </div>
         </div>
