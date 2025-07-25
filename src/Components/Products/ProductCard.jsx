@@ -38,22 +38,21 @@ function ProductCard({
     return () => clearInterval(intervalRef.current);
   }, []);
 
-  // Normalize and validate values
-const isDiscounted =
-  (on_sale === true || on_sale === 'true' || on_sale === 1 || on_sale === '1') &&
-  Number(discount_percentage) > 0;
+  // Normalize and validate discount status
+  const isDiscounted =
+    (on_sale === true || on_sale === 'true' || on_sale === 1 || on_sale === '1') &&
+    Number(discount_percentage) > 0;
 
-const originalPrice = Number(price);
-const discount = Number(discount_percentage);
-const discountedPrice = isDiscounted
-  ? (originalPrice * (1 - discount / 100)).toFixed(2)
-  : null;
-
-    
+  const originalPrice = Number(price);
+  const discount = Number(discount_percentage);
+  const discountedPrice = isDiscounted
+    ? (originalPrice * (1 - discount / 100)).toFixed(2)
+    : null;
 
   return (
     <div
-      className="flex flex-col bg-white border border-gray-200 rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 max-w-60 min-h-[340px] relative group overflow-hidden"
+      className="flex flex-col bg-white border border-gray-200 rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300
+                 w-full max-w-xs sm:max-w-sm md:max-w-md min-h-[300px] sm:min-h-[340px] relative group overflow-hidden"
       onMouseEnter={startCycling}
       onMouseLeave={stopCycling}
     >
@@ -84,7 +83,7 @@ const discountedPrice = isDiscounted
       </button>
 
       <Link to={`/details/${id}`} className="flex flex-col items-center flex-1 px-4 pt-5 pb-3 group relative z-10">
-        <div className="relative w-24 h-24 flex items-center justify-center rounded-lg bg-gray-50 border border-gray-100 mb-3 mt-6 overflow-hidden">
+        <div className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 flex items-center justify-center rounded-lg bg-gray-50 border border-gray-100 mb-3 mt-6 overflow-hidden">
           {imagesList.map((img, index) => (
             <img
               key={index}
@@ -99,9 +98,9 @@ const discountedPrice = isDiscounted
         </div>
 
         {/* Product Name */}
-        <div className="w-full mt-12 text-center">
+        <div className="w-full mt-8 sm:mt-12 text-center">
           <span
-            className="block font-semibold text-gray-900 text-base truncate"
+            className="block font-semibold text-gray-900 text-base truncate sm:whitespace-normal sm:break-words"
             title={name}
           >
             {name}
@@ -136,7 +135,7 @@ const discountedPrice = isDiscounted
       <div className="px-4 pb-4 mt-auto">
         <button
           type="button"
-          className="w-full bg-primary text-white font-semibold py-2 rounded-lg shadow hover:bg-yellow-500 transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full bg-primary text-white font-semibold py-2 rounded-lg shadow hover:bg-yellow-500 transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed text-sm sm:text-base"
           onClick={(e) => {
             e.preventDefault();
             onAddToCart();

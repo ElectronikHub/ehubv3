@@ -3,102 +3,114 @@ import { motion } from "framer-motion";
 
 function ServiceCard({ service }) {
   const sectionRef = useRef(null);
+  const videoRef = useRef(null);
+  const playTimeoutRef = useRef(null);
   const [scrollDir, setScrollDir] = useState("down");
-  const [trigger, setTrigger] = useState(false);
+  const [triggerAnimation, setTriggerAnimation] = useState(false);
 
-  // Scroll direction detection
   useEffect(() => {
-    let lastScrollY = window.scrollY;
-    const updateScrollDir = () => {
+    let lastY = window.scrollY;
+    const handleScroll = () => {
       const currentY = window.scrollY;
-      setScrollDir(currentY > lastScrollY ? "down" : "up");
-      lastScrollY = currentY;
+      setScrollDir(currentY > lastY ? "down" : "up");
+      lastY = currentY;
     };
-    window.addEventListener("scroll", updateScrollDir);
-    return () => window.removeEventListener("scroll", updateScrollDir);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Trigger animation on scroll into view
   useEffect(() => {
-    const onScroll = () => {
-      if (!sectionRef.current) return;
-      const rect = sectionRef.current.getBoundingClientRect();
-      const inView = rect.top < window.innerHeight * 0.8 && rect.bottom > 0;
-
-      if (scrollDir === "down" && inView && !trigger) {
-        setTrigger(true);
+    const handleVisibility = () => {
+      const rect = sectionRef.current?.getBoundingClientRect();
+      const inView = rect?.top < window.innerHeight * 0.75 && rect?.bottom > 0;
+      if (scrollDir === "down" && inView && !triggerAnimation) {
+        setTriggerAnimation(true);
       }
     };
-    window.addEventListener("scroll", onScroll);
-    onScroll(); // Check on mount
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [scrollDir, trigger]);
+    window.addEventListener("scroll", handleVisibility);
+    handleVisibility();
+    return () => window.removeEventListener("scroll", handleVisibility);
+  }, [scrollDir, triggerAnimation]);
 
   return (
-    <div
+    <motion.div
       ref={sectionRef}
-      id="research-paper-consultation-section"
-      className="w-screen min-h-screen bg-[#103054] relative text-white font-montserrat overflow-hidden"
+      id="artificial-intelligence-section"
+      className="bg-tertiary"
+      initial={{ opacity: 0, y: 50 }}
+      animate={triggerAnimation ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+      transition={{ duration: 1, ease: "easeOut" }}
     >
-      {/* Left Panel with Video */}
-      <motion.div
-        initial={false}
-        animate={trigger ? { x: 0 } : { x: "-100%" }}
-        transition={{ duration: 1.2, ease: "easeOut" }}
-        className="absolute top-0 left-0 w-full md:w-[48vw] h-[85vh] md:h-full bg-[#cccccc] overflow-hidden shadow-lg"
-      >
-        <motion.div
-          className="w-full h-full"
-          initial={false}
-          animate={trigger ? { scale: 1 } : { scale: 1.15 }}
-          transition={{ duration: 2, ease: "easeOut" }}
-        >
-          <video
-            src="/Assets/research.mp4"
-            muted
-            loop
-            playsInline
-            className="w-full h-full object-cover rounded-br-3xl"
-            onMouseEnter={(e) => e.currentTarget.play()}
-            onMouseLeave={(e) => {
-              e.currentTarget.pause();
-              e.currentTarget.currentTime = 0;
-            }}
-          />
-        </motion.div>
-      </motion.div>
+      {/* Top Accent Bar */}
+      <div className="w-full h-4 sm:h-6 md:h-8 bg-secondary" />
 
-      {/* Right Panel with Text */}
-      <motion.div
-        initial={false}
-        animate={trigger ? { opacity: 1, x: 0 } : { opacity: 0, x: 100 }}
-        transition={{ duration: 1.2, delay: 0.6, ease: "easeOut" }}
-        className="absolute top-[5%] left-0 md:left-[50vw] w-full md:w-[46vw] px-6 pt-10 pb-28 z-10"
-      >
-        <motion.h2
-          className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white-300 mb-6 leading-tight drop-shadow"
-          whileHover={{
-            textShadow: "0px 0px 14px rgba(0, 255, 255, 0.7)",
-            transition: { repeat: Infinity, repeatType: "reverse", duration: 0.8 },
-          }}
-        >
-          RESEARCH & ANALYTICS
-        </motion.h2>
+      {/* Main Container */}
+      <div className="min-h-[90vh] flex items-center justify-center px-4 sm:px-6 md:px-10 py-16 md:py-24">
+        <div className="flex flex-col-reverse md:flex-row items-center justify-between max-w-[1300px] w-full gap-10 md:gap-12">
 
-        <motion.p
-          className="text-base md:text-lg lg:text-xl text-white/90 leading-relaxed"
-          initial={false}
-          animate={trigger ? { y: 0, opacity: 1 } : { y: 20, opacity: 0 }}
-          transition={{ duration: 1, delay: 1.2 }}
-        >
-          Accelerate innovation and make smarter decisions with our expert-led research consultation and data analytics services.
-          <br /><br />
-          We provide tailored support in research design, methodology refinement, and advanced data interpretation—empowering businesses, academic institutions, and market analysts alike.
-          <br /><br />
-          From white papers to predictive models, our collaborative approach ensures your insights are actionable, accurate, and aligned with your strategic goals.
-        </motion.p>
-      </motion.div>
-    </div>
+          {/* Text Section */}
+          <motion.div
+            className="w-full md:w-1/2 text-center md:text-left text-black px-2 sm:px-4"
+            initial={false}
+            animate={triggerAnimation ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-blue-900 leading-snug drop-shadow-md hover-glow">
+              RESEARCH & ANALYTICS
+            </h1>
+
+            <motion.p
+              className="mt-5 text-sm sm:text-base md:text-lg leading-relaxed text-black"
+              initial={false}
+              animate={triggerAnimation ? { x: 0, opacity: 1 } : { x: -50, opacity: 0 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+            >
+              Accelerate innovation and make smarter decisions with our expert-led research consultation and data analytics services.
+              <br /><br />
+             We provide tailored support in research design, methodology refinement, and advanced data interpretation—empowering businesses, academic institutions, and market analysts alike.
+            <br /><br />
+            From white papers to predictive models, our collaborative approach ensures your insights are actionable, accurate, and aligned with your strategic goals.
+            </motion.p>
+          </motion.div>
+
+          {/* Video Section */}
+          <motion.div
+            initial={false}
+            animate={
+              triggerAnimation
+                ? { opacity: 1, scale: 1, rotate: 0 }
+                : { opacity: 0, scale: 0.9, rotate: -5 }
+            }
+            transition={{ duration: 0.8, delay: 0.8, ease: "easeOut" }}
+            className="w-full md:w-1/2 h-[250px] sm:h-[300px] md:h-[400px] lg:h-[500px] flex justify-center items-center overflow-hidden px-2 sm:px-4"
+          >
+            <video
+  ref={videoRef}
+  src="./Assets/Research.mp4"
+  className="w-full h-full object-cover rounded-xl shadow-lg"
+  muted
+  loop
+  playsInline
+  onMouseEnter={() => {
+    playTimeoutRef.current = setTimeout(() => {
+      if (videoRef.current) {
+        videoRef.current.play();
+      }
+    }, 2000);
+  }}
+  onMouseLeave={() => {
+    clearTimeout(playTimeoutRef.current);
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+  }}
+/>
+          </motion.div>
+
+        </div>
+      </div>
+    </motion.div>
   );
 }
 
