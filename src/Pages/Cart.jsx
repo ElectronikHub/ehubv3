@@ -14,16 +14,58 @@ function CartPage() {
   const [isVoucherValid, setIsVoucherValid] = useState(true);
   const [voucherAmount, setVoucherAmount] = useState(0); // NEW
 
-  useEffect(() => {
-    const cartData = JSON.parse(localStorage.getItem('cart')) || [];
-    setCartItems(cartData);
+useEffect(() => {
+  const syncCartWithBackend = async () => {
+    const cartData = JSON.parse(localStorage.getItem("cart")) || [];
+    if (!cartData.length) {
+      setCartItems([]);
+      return;
+    }
 
-    const initialRemoveQuantities = {};
-    cartData.forEach((item, index) => {
-      initialRemoveQuantities[index] = 1;
-    });
-    setRemoveQuantities(initialRemoveQuantities);
-  }, []);
+    try {
+      // Fetch the latest product prices/discounts from backend
+      const productIds = cartData.map(item => item.id);
+      const res = await axios.post(
+        "http://localhost:8000/api/cart-products",
+        { ids: productIds }
+      );
+
+      const updatedCart = cartData.map(item => {
+        const latest = res.data.find(p => p.id === item.id);
+        if (!latest) return item;
+
+        return {
+          ...item,
+          price: latest.price, // store raw number, not "₱"
+          discount_percentage: latest.discount_percentage || 0
+        };
+      });
+
+      setCartItems(updatedCart);
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
+
+      // Keep your existing removeQuantities logic
+      const initialRemoveQuantities = {};
+      updatedCart.forEach((item, index) => {
+        initialRemoveQuantities[index] = 1;
+      });
+      setRemoveQuantities(initialRemoveQuantities);
+
+    } catch (err) {
+      console.error("Error syncing cart prices:", err);
+      setCartItems(cartData);
+
+      const initialRemoveQuantities = {};
+      cartData.forEach((item, index) => {
+        initialRemoveQuantities[index] = 1;
+      });
+      setRemoveQuantities(initialRemoveQuantities);
+    }
+  };
+
+  syncCartWithBackend();
+}, []);
+
 
   const handleRemoveQuantityChange = (index, event) => {
     let value = parseInt(event.target.value);
@@ -85,7 +127,15 @@ useEffect(() => {
 
       if (res.data.valid) {
         setIsVoucherValid(true);
-        setVoucherAmount(parseFloat(res.data.discount_amount) || 0);
+
+        if (res.data.type === "percent") {
+          // Apply percentage discount based on current total
+          const percentValue = (grandTotal * res.data.discount_amount) / 100;
+          setVoucherAmount(percentValue);
+        } else {
+          // Fixed amount discount
+          setVoucherAmount(parseFloat(res.data.discount_amount) || 0);
+        }
       } else {
         setIsVoucherValid(false);
         setVoucherAmount(0);
@@ -97,8 +147,7 @@ useEffect(() => {
   };
 
   validateVoucher();
-}, [voucherCode]);
-
+}, [voucherCode, grandTotal]);
   const handleCheckoutChange = (e) => {
     setCheckoutData({ ...checkoutData, [e.target.name]: e.target.value });
   };
