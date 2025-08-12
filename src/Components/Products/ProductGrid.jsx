@@ -8,7 +8,7 @@ const ProductGrid = ({
   containerRef,
   containerWidth,
   columnCount,
-  gridHeight,
+  gridHeight, // from Products.jsx
   CARD_WIDTH,
   CARD_HEIGHT,
   toggleFavorite,
@@ -16,11 +16,16 @@ const ProductGrid = ({
   setCartItems,
 }) => {
   return (
-    <div className="w-full px-2 sm:px-4 py-6 bg-tertiary mx-auto" style={{ maxWidth: "100%" }}>
+    <div
+      className="w-full px-2 sm:px-4 py-6 bg-tertiary mx-auto"
+      style={{ maxWidth: "100%" }}
+    >
       <div ref={containerRef} className="mx-auto w-full">
         <Suspense fallback={<div>Loading products...</div>}>
+
           {containerWidth < 640 ? (
-            <div className="grid grid-cols-2 gap-4 px-2 sm:px-4">
+            // Mobile layout: normal grid
+            <div className="grid grid-cols-2 gap-4">
               {displayedProducts.map((product) => {
                 const handleToggleFavorite = () => toggleFavorite(product.name);
                 const handleAddToCart = () => {
@@ -61,14 +66,17 @@ const ProductGrid = ({
               })}
             </div>
           ) : (
-            <Grid
-              columnCount={columnCount}
-              columnWidth={CARD_WIDTH}
-              height={gridHeight > 400 ? gridHeight : 400}
-              rowCount={Math.ceil(displayedProducts.length / columnCount)}
-              rowHeight={CARD_HEIGHT}
-              width={containerWidth}
-            >
+            // Desktop layout: react-window grid takes full height minus header
+          <Grid
+  columnCount={columnCount}
+  columnWidth={CARD_WIDTH}
+  height={gridHeight}
+  rowCount={Math.ceil(displayedProducts.length / columnCount)}
+  rowHeight={CARD_HEIGHT}
+  width={containerWidth - 32} // subtract 32px total padding (16px each side from px-4)
+  style={{ overflowX: 'hidden' }} // ensure no horizontal scroll
+>
+
               {({ columnIndex, rowIndex, style }) => {
                 const index = rowIndex * columnCount + columnIndex;
                 if (index >= displayedProducts.length) return null;
@@ -114,6 +122,7 @@ const ProductGrid = ({
               }}
             </Grid>
           )}
+
         </Suspense>
       </div>
     </div>

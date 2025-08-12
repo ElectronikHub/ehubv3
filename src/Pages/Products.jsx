@@ -63,7 +63,9 @@ const Products = () => {
   }, []);
 
   // Responsive card width adjustment
- const CARD_WIDTH = containerWidth < 500 ? containerWidth / 2 - 20 : 250;
+ const CARD_WIDTH = containerWidth < 500
+  ? Math.floor((containerWidth - 16) / 2)  // subtract padding/margins
+  : 250;
   const CARD_HEIGHT = 360;
 
   // Calculate column count based on container width and card width (minimum 1)
@@ -185,7 +187,7 @@ const Products = () => {
 
   return (
     <>
-      <div className="w-full min-h-screen bg-tertiary font-[Archivo] relative">
+      <div className="w-full min-h-screen bg-tertiary font-[Archivo] relative overflow-x-hidden">
         {/* Product Hero Section */}       
        <ProductHero
           searchQuery={searchQuery}
@@ -222,6 +224,8 @@ const Products = () => {
           style={{ maxWidth: "100%" }}
         >
           <ProductGrid
+          className="grid gap-4"
+          style={{ maxWidth: '100%', overflowX: 'hidden' }}
           displayedProducts={displayedProducts}
           containerRef={containerRef}
           containerWidth={containerWidth}

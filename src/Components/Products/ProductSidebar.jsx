@@ -8,11 +8,11 @@ const ProductSidebar = ({
   setSelectedType,
 }) => {
   return (
-    <div
-      className={`fixed top-0 right-0 h-full bg-white text-black shadow-lg z-50 overflow-y-auto transition-transform duration-300 ease-in-out transform ${
-        showSidebar ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
-      } w-4/5 sm:w-2/3 md:w-1/2 lg:w-1/3 xl:w-1/4 px-3 pt-12 border-l border-gray-200`}
-    >
+      <div
+        className={`fixed top-0 right-0 h-full bg-white text-black shadow-lg z-50 overflow-y-auto overflow-x-hidden transition-transform duration-300 ease-in-out transform ${
+          showSidebar ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
+        } w-4/5 sm:w-2/3 md:w-1/2 lg:w-1/3 xl:w-1/4 px-3 pt-12 border-l border-gray-200`}
+      >
       <button
         onClick={() => setShowSidebar(false)}
         className="absolute top-3 right-4 text-black text-lg sm:text-base md:text-xl font-bold hover:text-primary"
