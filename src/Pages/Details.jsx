@@ -217,7 +217,6 @@ const discountedPrice = isDiscounted
               <button onClick={handleAddToCart} className="bg-blue-600 text-white px-6 py-2 rounded">
                 Add to Cart
               </button>
-              <button className="bg-yellow-500 text-white px-6 py-2 rounded">Buy Now</button>
             </div>
           </div>
         </div>
