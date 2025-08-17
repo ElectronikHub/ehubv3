@@ -153,10 +153,10 @@ useEffect(() => {
   };
 
   const handleCheckoutSubmit = async () => {
-    if (!isVoucherValid) {
-      alert("Cannot proceed: invalid voucher code.");
-      return;
-    }
+   if (voucherCode.trim() && !isVoucherValid) {
+  alert("Cannot proceed: invalid voucher code.");
+  return;
+}
 
     try {
      const payload = {
