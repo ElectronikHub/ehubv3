@@ -32,10 +32,8 @@ function ServiceCard() {
   const [scrollDir, setScrollDir] = useState("down");
   const [shouldAnimate, setShouldAnimate] = useState(false);
 
-  // Track scroll direction
   useEffect(() => {
     let lastScrollY = window.scrollY;
-
     const updateScrollDir = () => {
       const currentScrollY = window.scrollY;
       const direction = currentScrollY > lastScrollY ? "down" : "up";
@@ -44,12 +42,10 @@ function ServiceCard() {
       }
       lastScrollY = currentScrollY > 0 ? currentScrollY : 0;
     };
-
     window.addEventListener("scroll", updateScrollDir);
     return () => window.removeEventListener("scroll", updateScrollDir);
   }, [scrollDir]);
 
-  // Trigger animation only when scrolling down into view
   useEffect(() => {
     const handleScroll = () => {
       const section = document.getElementById("section-web");
@@ -63,7 +59,7 @@ function ServiceCard() {
     };
 
     window.addEventListener("scroll", handleScroll);
-    handleScroll(); // check on mount
+    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, [scrollDir, shouldAnimate]);
 
@@ -75,10 +71,10 @@ function ServiceCard() {
   ];
 
   return (
-    <div id="web-dev-section" className="bg-white py-20 overflow-hidden">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <div id="web-dev-section" className="bg-white py-16 sm:py-20 lg:py-24 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <motion.h2
-          className="text-4xl sm:text-5xl lg:text-6xl archivo-black-regular text-primary font-bold leading-tight"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold archivo-black-regular text-primary leading-tight"
           initial={{ y: -50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
@@ -87,7 +83,7 @@ function ServiceCard() {
         </motion.h2>
 
         <motion.p
-          className="mt-8 text-lg sm:text-xl montserrat-regular max-w-4xl mx-auto"
+          className="mt-6 sm:mt-8 text-base sm:text-lg md:text-xl max-w-3xl mx-auto montserrat-regular text-gray-700"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.5 }}
@@ -100,7 +96,7 @@ function ServiceCard() {
 
       <motion.div
         id="section-web"
-        className="flex flex-wrap justify-center items-stretch gap-8 px-4 sm:px-6 lg:px-8 pt-16 pb-20"
+        className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-4 sm:px-6 lg:px-12"
         variants={containerVariants}
         initial="hidden"
         animate={shouldAnimate ? "show" : "hidden"}
@@ -108,25 +104,25 @@ function ServiceCard() {
         {services.map((service, index) => (
           <motion.div
             key={index}
-            className="w-full sm:w-60 h-60 bg-primary text-white rounded-2xl p-6 shadow-2xl flex flex-col justify-center items-center relative group"
+            className="bg-primary text-white rounded-2xl p-6 shadow-2xl flex flex-col items-center justify-center transition-all duration-300 ease-in-out"
             variants={cardVariants}
             whileHover={{ scale: 1.05, rotate: [0, 1, -1, 0] }}
           >
             <motion.div
-              className="rounded-full bg-tertiary w-24 h-24 flex justify-center items-center mb-4 relative z-10"
+              className="rounded-full bg-tertiary w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center mb-4"
               variants={iconVariants}
               whileHover="hover"
             >
               <img
                 src={service.icon}
                 alt={`${service.label} icon`}
-                className="w-12 h-12 object-contain"
+                className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
               />
             </motion.div>
 
-            <div className="absolute inset-0 rounded-2xl bg-tertiary opacity-0 group-hover:opacity-10 blur-lg transition duration-300" />
-
-            <span className="archivo-black-regular text-tertiary text-lg">{service.label}</span>
+            <span className="text-lg sm:text-xl text-tertiary archivo-black-regular mt-2">
+              {service.label}
+            </span>
           </motion.div>
         ))}
       </motion.div>

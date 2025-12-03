@@ -1,131 +1,118 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
-const textVariants = {
-  hidden: { opacity: 0, y: 40 },
-  visible: (i = 1) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: 0.3 * i, duration: 0.8, ease: "easeOut" },
-  }),
-};
-
-const videoVariants = {
-  initial: { scale: 1, rotate: 0 },
-  animate: {
-    scale: 1.05,
-    rotate: [-1.5, 1.5, -1.5],
-    transition: {
-      duration: 8,
-      ease: "easeInOut",
-      repeat: Infinity,
-      repeatType: "mirror",
-    },
-  },
-  hover: {
-    scale: 1.08,
-    rotate: 0,
-    transition: { duration: 0.5 },
-  },
-};
-
-function ServiceCard() {
+function ServiceCard({ service }) {
   const sectionRef = useRef(null);
+  const videoRef = useRef(null);
+  const playTimeoutRef = useRef(null);
   const [scrollDir, setScrollDir] = useState("down");
-  const [shouldAnimate, setShouldAnimate] = useState(false);
+  const [triggerAnimation, setTriggerAnimation] = useState(false);
 
   useEffect(() => {
     let lastY = window.scrollY;
     const handleScroll = () => {
       const currentY = window.scrollY;
-      if (Math.abs(currentY - lastY) > 5) {
-        setScrollDir(currentY > lastY ? "down" : "up");
-        lastY = currentY;
-      }
+      setScrollDir(currentY > lastY ? "down" : "up");
+      lastY = currentY;
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
-    const onScroll = () => {
+    const handleVisibility = () => {
       const rect = sectionRef.current?.getBoundingClientRect();
-      const inView = rect && rect.top < window.innerHeight * 0.8 && rect.bottom > 0;
-      if (scrollDir === "down" && inView && !shouldAnimate) {
-        setShouldAnimate(true);
+      const inView = rect?.top < window.innerHeight * 0.75 && rect?.bottom > 0;
+      if (scrollDir === "down" && inView && !triggerAnimation) {
+        setTriggerAnimation(true);
       }
     };
-
-    window.addEventListener("scroll", onScroll);
-    onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [scrollDir, shouldAnimate]);
+    window.addEventListener("scroll", handleVisibility);
+    handleVisibility();
+    return () => window.removeEventListener("scroll", handleVisibility);
+  }, [scrollDir, triggerAnimation]);
 
   return (
-    <div
+    <motion.div
       ref={sectionRef}
-      id="blockchain-cryptocurrency-section"
-      className="relative min-h-screen flex items-center justify-center px-6 py-12 overflow-hidden bg-white"
+      id="artificial-intelligence-section"
+      className="bg-tertiary"
+      initial={{ opacity: 0, y: 50 }}
+      animate={triggerAnimation ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+      transition={{ duration: 1, ease: "easeOut" }}
     >
-      {/* Ambient Animated Background */}
-      <motion.div
-        className="absolute inset-0 bg-gradient-to-br from-white via-blue-50 to-purple-100 opacity-20 blur-2xl z-0"
-        animate={{ opacity: [0.2, 0.4, 0.2] }}
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-      />
+      {/* Top Accent Bar */}
+      <div className="w-full h-4 sm:h-6 md:h-8 bg-secondary" />
 
-      <section className="relative z-10 flex flex-col md:flex-row items-center justify-between max-w-7xl w-full gap-16 px-6 md:px-12">
-        {/* Text Content */}
-        <div className="max-w-lg text-center md:text-left">
-          <motion.h1
-            className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-blue-900 leading-tight drop-shadow-md"
-            variants={textVariants}
-            initial="hidden"
-            animate={shouldAnimate ? "visible" : "hidden"}
-            custom={1}
-          >
-            BLOCKCHAIN /<br />CRYPTOCURRENCY
-          </motion.h1>
+      {/* Main Container */}
+      <div className="min-h-[90vh] flex items-center justify-center px-4 sm:px-6 md:px-10 py-16 md:py-24">
+        <div className="flex flex-col-reverse md:flex-row items-center justify-between max-w-[1300px] w-full gap-10 md:gap-12">
 
-          <motion.p
-            className="mt-6 text-gray-700 text-base sm:text-lg md:text-xl leading-relaxed"
-            variants={textVariants}
-            initial="hidden"
-            animate={shouldAnimate ? "visible" : "hidden"}
-            custom={2}
+          {/* Text Section */}
+          <motion.div
+            className="w-full md:w-1/2 text-center md:text-left text-black px-2 sm:px-4"
+            initial={false}
+            animate={triggerAnimation ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
           >
-            Embrace the decentralized revolution. Our blockchain development services
-            provide a strong foundation for secure, scalable, and transparent digital infrastructures.
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-blue-900 leading-snug drop-shadow-md hover-glow">
+              BLOCKCHAIN /
+CRYPTOCURRENCY
+            </h1>
+
+            <motion.p
+              className="mt-5 text-sm sm:text-base md:text-lg leading-relaxed text-black"
+              initial={false}
+              animate={triggerAnimation ? { x: 0, opacity: 1 } : { x: -50, opacity: 0 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+            >
+              Embrace the decentralized revolution. Our blockchain development services provide a strong foundation for secure, scalable, and transparent digital infrastructures.
+              <br /><br />
+             We specialize in building decentralized applications (dApps), smart contract architecture, and custom cryptocurrency token creation.
             <br /><br />
-            We specialize in building decentralized applications (dApps), smart contract architecture,
-            and custom cryptocurrency token creation.
-            <br /><br />
-            Whether you’re launching a DeFi platform, NFT marketplace, or integrating blockchain
-            into supply chain or identity management—our team delivers reliable, industry-grade solutions.
-          </motion.p>
+            Whether you’re launching a DeFi platform, NFT marketplace, or integrating blockchain into supply chain or identity management—our team delivers reliable, industry-grade solutions.
+            </motion.p>
+          </motion.div>
+
+          {/* Video Section */}
+          <motion.div
+            initial={false}
+            animate={
+              triggerAnimation
+                ? { opacity: 1, scale: 1, rotate: 0 }
+                : { opacity: 0, scale: 0.9, rotate: -5 }
+            }
+            transition={{ duration: 0.8, delay: 0.8, ease: "easeOut" }}
+            className="w-full md:w-1/2 h-[250px] sm:h-[300px] md:h-[400px] lg:h-[500px] flex justify-center items-center overflow-hidden px-2 sm:px-4"
+          >
+            <video
+  ref={videoRef}
+  src="./Assets/Crypto.mp4"
+  className="w-full h-full object-cover rounded-xl shadow-lg"
+  muted
+  loop
+  playsInline
+  onMouseEnter={() => {
+    playTimeoutRef.current = setTimeout(() => {
+      if (videoRef.current) {
+        videoRef.current.play();
+      }
+    }, 2000);
+  }}
+  onMouseLeave={() => {
+    clearTimeout(playTimeoutRef.current);
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+  }}
+/>
+          </motion.div>
+
         </div>
-
-        {/* Video Section */}
-        <motion.div
-          className="lg:w-1/2 w-full h-[70vh] rounded-xl overflow-hidden shadow-xl"
-          variants={videoVariants}
-          initial="initial"
-        >
-          <video
-            src="./Assets/Crypto.mp4"
-            className="w-full h-full object-cover"
-            muted
-            loop
-            playsInline
-            onMouseEnter={(e) => e.currentTarget.play()}
-            onMouseLeave={(e) => {
-              e.currentTarget.pause();
-              e.currentTarget.currentTime = 0;
-            }}
-          />
-        </motion.div>
-      </section>
-    </div>
+      </div>
+    </motion.div>
   );
 }
+
 export default ServiceCard;

@@ -1,120 +1,114 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
-function ServiceCard() {
+function ServiceCard({ service }) {
   const sectionRef = useRef(null);
   const videoRef = useRef(null);
-  const [ setHovered] = useState(false);
+  const playTimeoutRef = useRef(null);
   const [scrollDir, setScrollDir] = useState("down");
-  const [trigger, setTrigger] = useState(false);
+  const [triggerAnimation, setTriggerAnimation] = useState(false);
 
-  // Scroll direction logic
   useEffect(() => {
-    let lastScrollY = window.scrollY;
+    let lastY = window.scrollY;
     const handleScroll = () => {
       const currentY = window.scrollY;
-      setScrollDir(currentY > lastScrollY ? "down" : "up");
-      lastScrollY = currentY;
+      setScrollDir(currentY > lastY ? "down" : "up");
+      lastY = currentY;
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Trigger animation once in view and scrolling down
   useEffect(() => {
     const handleVisibility = () => {
-      if (!sectionRef.current) return;
-      const rect = sectionRef.current.getBoundingClientRect();
-      const inView = rect.top < window.innerHeight * 0.75 && rect.bottom > 0;
-      if (inView && scrollDir === "down" && !trigger) setTrigger(true);
+      const rect = sectionRef.current?.getBoundingClientRect();
+      const inView = rect?.top < window.innerHeight * 0.75 && rect?.bottom > 0;
+      if (scrollDir === "down" && inView && !triggerAnimation) {
+        setTriggerAnimation(true);
+      }
     };
     window.addEventListener("scroll", handleVisibility);
     handleVisibility();
     return () => window.removeEventListener("scroll", handleVisibility);
-  }, [scrollDir, trigger]);
+  }, [scrollDir, triggerAnimation]);
 
-  // Video hover control
-  const handleMouseEnter = () => {
-    setHovered(true);
-    videoRef.current?.play();
-  };
+  return (
+    <motion.div
+      ref={sectionRef}
+      id="artificial-intelligence-section"
+      className="bg-tertiary"
+      initial={{ opacity: 0, y: 50 }}
+      animate={triggerAnimation ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+      transition={{ duration: 1, ease: "easeOut" }}
+    >
+      {/* Top Accent Bar */}
+      <div className="w-full h-4 sm:h-6 md:h-8 bg-secondary" />
 
-  const handleMouseLeave = () => {
-    setHovered(false);
-    videoRef.current?.pause();
-    videoRef.current.currentTime = 0;
-  };
+      {/* Main Container */}
+      <div className="min-h-[90vh] flex items-center justify-center px-4 sm:px-6 md:px-10 py-16 md:py-24">
+        <div className="flex flex-col-reverse md:flex-row items-center justify-between max-w-[1300px] w-full gap-10 md:gap-12">
 
-    return (
-        <div
-        id = "point-of-sale-section"
-            className="w-full h-screen relative overflow-hidden"
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-        >
-            {/* Animated Background Video with Zoom-Out Effect */}
-            <motion.video
-                ref={videoRef}
-                className="absolute inset-0 w-full h-full object-cover scale-110"
-                initial={{ scale: 1.2 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 4, ease: "easeOut" }}
-                muted
-                playsInline
-                preload="none"
-                src="/Assets/POS.mp4"
-            />
-
-      {/* Floating light effects */}
-      <motion.div
-        className="absolute top-10 left-10 w-32 h-32 rounded-full bg-blue-500 opacity-20 blur-3xl"
-        animate={{ x: [0, 20, -20, 0], y: [0, 20, -20, 0] }}
-        transition={{ repeat: Infinity, duration: 10, ease: "easeInOut" }}
-      />
-      <motion.div
-        className="absolute bottom-16 right-10 w-40 h-40 bg-purple-600 opacity-10 rounded-full blur-2xl"
-        animate={{ y: [0, -15, 15, 0], x: [0, -15, 15, 0] }}
-        transition={{ repeat: Infinity, duration: 12, ease: "easeInOut" }}
-      />
-
-      {/* Content Overlay */}
-      <div className="relative flex flex-col items-center justify-center h-full px-6 z-10">
-        <motion.div
-          className="bg-black/60 backdrop-blur-md rounded-2xl p-10 max-w-3xl w-full border border-white/10 shadow-2xl"
-          initial={false}
-          animate={trigger ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-          transition={{ duration: 1.5, delay: 0.5, ease: "easeOut" }}
-          whileHover={{
-            scale: 1.02,
-            boxShadow: "0 0 40px rgba(255, 255, 255, 0.12)",
-          }}
-        >
-          <motion.h3
-            className="text-white text-4xl sm:text-5xl text-center font-bold mb-4"
-            style={{ textShadow: "2px 2px 6px rgba(0, 0, 0, 0.5)" }}
+          {/* Text Section */}
+          <motion.div
+            className="w-full md:w-1/2 text-center md:text-left text-black px-2 sm:px-4"
             initial={false}
-            animate={trigger ? { opacity: 1, y: 0 } : { opacity: 0, y: -30 }}
-            transition={{ duration: 1, delay: 1 }}
+            animate={triggerAnimation ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
           >
-            POINT OF SALE (POS)
-          </motion.h3>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-blue-900 leading-snug drop-shadow-md hover-glow">
+              POINT OF SALE (POS)
+            </h1>
 
-          <motion.p
-            className="mt-2 text-lg sm:text-xl text-white text-center leading-relaxed"
+            <motion.p
+              className="mt-5 text-sm sm:text-base md:text-lg leading-relaxed text-black"
+              initial={false}
+              animate={triggerAnimation ? { x: 0, opacity: 1 } : { x: -50, opacity: 0 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+            >
+              Elevate your business operations with our cutting-edge POS solutions—built to handle everything from transactions to inventory, customer loyalty, and real-time analytics.
+              <br /><br />
+            Whether you're in retail, food service, or hospitality, our systems are fast, reliable, and customizable to your needs. Enjoy seamless integration with secure payments, simplified staff training, and tools that scale as you grow.
+            </motion.p>
+          </motion.div>
+
+          {/* Video Section */}
+          <motion.div
             initial={false}
-            animate={trigger ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-            transition={{ duration: 1.2, delay: 1.3 }}
+            animate={
+              triggerAnimation
+                ? { opacity: 1, scale: 1, rotate: 0 }
+                : { opacity: 0, scale: 0.9, rotate: -5 }
+            }
+            transition={{ duration: 0.8, delay: 0.8, ease: "easeOut" }}
+            className="w-full md:w-1/2 h-[250px] sm:h-[300px] md:h-[400px] lg:h-[500px] flex justify-center items-center overflow-hidden px-2 sm:px-4"
           >
-            Elevate your business operations with our cutting-edge POS solutions—built to handle
-            everything from transactions to inventory, customer loyalty, and real-time analytics.
-            <br /><br />
-            Whether you're in retail, food service, or hospitality, our systems are fast, reliable,
-            and customizable to your needs. Enjoy seamless integration with secure payments, simplified
-            staff training, and tools that scale as you grow.
-          </motion.p>
-        </motion.div>
+            <video
+  ref={videoRef}
+  src="./Assets/POS.mp4"
+  className="w-full h-full object-cover rounded-xl shadow-lg"
+  muted
+  loop
+  playsInline
+  onMouseEnter={() => {
+    playTimeoutRef.current = setTimeout(() => {
+      if (videoRef.current) {
+        videoRef.current.play();
+      }
+    }, 2000);
+  }}
+  onMouseLeave={() => {
+    clearTimeout(playTimeoutRef.current);
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+  }}
+/>
+          </motion.div>
+
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

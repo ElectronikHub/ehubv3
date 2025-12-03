@@ -1,9 +1,12 @@
-import { useState, useEffect, Suspense, lazy, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../Data/axios";
-// Removed FixedSizeGrid import as we're using CSS Grid for simplicity
-// import { FixedSizeGrid as Grid } from 'react-window'; 
-const ProductCard = lazy(() => import("../Components/Products/ProductCard"));
+import ProductHero from "../Components/Products/ProductHero";
+import ProductFilter from "../Components/Products/ProductFilter";
+import ProductPagination from "../Components/Products/ProductPagination";
+import ProductGrid from "../Components/Products/ProductGrid";
+import ProductSidebar from "../Components/Products/ProductSidebar";
+
 
 function useDebounce(value, delay) {
   const [debounced, setDebounced] = useState(value);
@@ -23,9 +26,11 @@ function useDebounce(value, delay) {
 
 const Products = () => {
   const navigate = useNavigate();
+
+  // State declarations
   const [allProducts, setAllProducts] = useState([]);
-  const [selectedType, setSelectedType] = useState('ALL');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedType, setSelectedType] = useState("ALL");
+  const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearch = useDebounce(searchQuery, 300);
   const [productSuggestions, setProductSuggestions] = useState([]);
   const [categorySuggestions, setCategorySuggestions] = useState([]);
@@ -33,97 +38,124 @@ const Products = () => {
   const [cartItems, setCartItems] = useState([]);
   const [showingFavorites, setShowingFavorites] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
-  const [sortOption, setSortOption] = useState('featured');
+  const [sortOption, setSortOption] = useState("featured");
   const [showSidebar, setShowSidebar] = useState(false);
   const [categoriesFromDB, setCategoriesFromDB] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [favorites, setFavorites] = useState(() => {
-    const saved = localStorage.getItem('favorites');
+    const saved = localStorage.getItem("favorites");
     return saved ? JSON.parse(saved) : [];
   });
 
-  const isOutOfStock = (productId, stock) => {
-    const item = cartItems.find(i => i.id === productId);
-    return item ? item.quantity >= stock : false;
-  };
+  // Container ref and width for responsiveness
+  const containerRef = useRef(null);
+  const [containerWidth, setContainerWidth] = useState(window.innerWidth);
 
+  useEffect(() => {
+    const handleResize = () => {
+      const width = containerRef.current?.offsetWidth || window.innerWidth;
+      setContainerWidth(width);
+    };
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Initial measure
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Responsive card width adjustment
+ const CARD_WIDTH = containerWidth < 500
+  ? Math.floor((containerWidth - 16) / 2)  // subtract padding/margins
+  : 250;
+  const CARD_HEIGHT = 360;
+
+  // Calculate column count based on container width and card width (minimum 1)
+  const columnCount = Math.max(1, Math.floor(containerWidth / CARD_WIDTH));
+
+  // Calculate grid height (window height minus header)
+  const [windowHeight, setWindowHeight] = useState(window.innerHeight);
+  useEffect(() => {
+    const onResize = () => setWindowHeight(window.innerHeight);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+  const headerHeight = 160; // Reduced header height after profile removal.
+  const gridHeight = windowHeight - headerHeight;
+
+  // Favorites toggle
   const toggleFavorite = (productName) => {
     setFavorites((prev) => {
       const updated = prev.includes(productName)
         ? prev.filter((name) => name !== productName)
         : [...prev, productName];
-      localStorage.setItem('favorites', JSON.stringify(updated));
+      localStorage.setItem("favorites", JSON.stringify(updated));
       return updated;
     });
   };
 
-  // Fetch Categories: Using relative path 'apicategories'
+  // Fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await api.get('apicategories'); // Correct: Uses baseURL + 'apicategories'
+        const res = await api.get("http://localhost:8000/api/apicategories");
         setCategoriesFromDB(res.data);
       } catch (err) {
-        console.error('Failed to fetch categories:', err);
+        console.error("Failed to fetch categories:", err);
       }
     };
     fetchCategories();
   }, []);
 
-  // Fetch Products: Using relative path 'apiproducts'
+  // Fetch products
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await api.get('apiproducts', { // Correct: Uses baseURL + 'apiproducts'
+        const res = await api.get("http://localhost:8000/api/apiproducts", {
           params: {
             sort: sortOption,
             page: currentPage,
-            category: selectedType !== 'ALL' ? selectedType : undefined,
-            search: debouncedSearch.trim() !== '' ? debouncedSearch.trim() : undefined,
-          }
+            category: selectedType !== "ALL" ? selectedType : undefined,
+            search: debouncedSearch.trim() !== "" ? debouncedSearch.trim() : undefined,
+          },
         });
         setAllProducts(
-          (res.data.data || []).map(product => ({
+          (res.data.data || []).map((product) => ({
             ...product,
             stock: Number(product.stock),
-            image: product.image || '/img/default.png'
+            image: product.image || "/img/default.png",
           }))
         );
         setTotalPages(res.data.last_page || 1);
       } catch (err) {
-        console.error('Failed to fetch products:', err);
+        console.error("Failed to fetch products:", err);
       }
     };
     fetchProducts();
   }, [sortOption, currentPage, selectedType, debouncedSearch]);
 
-
-  // Filtering and suggestions
-  useEffect(() => {
-    if (!debouncedSearch) {
+  // Fetch search suggestions
+ useEffect(() => {
+  if (!debouncedSearch) {
+    setProductSuggestions([]);
+    return;
+  }
+  const fetchSuggestions = async () => {
+    try {
+      setIsLoadingSuggestions(true);
+      const res = await api.get("/products/suggestions", {
+        params: { search: debouncedSearch },
+      });
+      // Transform response to an array of product names
+      const names = (res.data || []).map(item => (typeof item === 'string' ? item : item.name || ''));
+      setProductSuggestions(names.filter(name => name)); // Filter out empty strings
+    } catch {
       setProductSuggestions([]);
-      return;
     }
+    setIsLoadingSuggestions(false);
+  };
+  fetchSuggestions();
+}, [debouncedSearch]);
 
-    const fetchSuggestions = async () => {
-      try {
-        setIsLoadingSuggestions(true);
-        // FIX: Changed 'suggestions' to 'apiproducts/suggestions' to match Laravel route
-        const res = await api.get('apiproducts/suggestions', { 
-          params: { search: debouncedSearch }
-        });
-        setProductSuggestions(res.data || []);
-      } catch (err) {
-        setProductSuggestions([]);
-      }
-      setIsLoadingSuggestions(false);
-    };
-
-    fetchSuggestions();
-  }, [debouncedSearch]);
-
+  // Category suggestions
   useEffect(() => {
     const query = searchQuery.toLowerCase();
     const categoryMatches = categoriesFromDB
@@ -132,342 +164,88 @@ const Products = () => {
     setCategorySuggestions(categoryMatches.slice(0, 5));
   }, [searchQuery, categoriesFromDB]);
 
-  // Close dropdown when clicking outside
+  // Load cart data from localStorage
   useEffect(() => {
-    if (!profileDropdownOpen) return;
-    const handleClick = (e) => {
-      if (!e.target.closest("#profile-dropdown")) {
-        setProfileDropdownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [profileDropdownOpen]);
-
-  useEffect(() => {
-    const storedCart = localStorage.getItem('cart');
+    const storedCart = localStorage.getItem("cart");
     if (storedCart) {
       setCartItems(JSON.parse(storedCart));
     }
   }, []);
 
+  // Check if a product is out of stock based on cart quantities
+  const isOutOfStock = (productId, stock) => {
+    const item = cartItems.find((i) => i.id === productId);
+    return item ? item.quantity >= stock : false;
+  };
+
+  // Proper displayed products based on favorites filter
   const displayedProducts = showingFavorites
     ? allProducts.filter((product) => favorites.includes(product.name))
     : allProducts;
 
-  // Pagination controls
-  const Pagination = () => (
-    <div className="flex justify-center items-center gap-2 my-6">
-      <button
-        onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
-        disabled={currentPage === 1}
-        className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
-      >
-        Previous
-      </button>
-      <span className="mx-2 text-sm">
-        Page {currentPage} of {totalPages}
-      </span>
-      <button
-        onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
-        disabled={currentPage === totalPages}
-        className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
-      >
-        Next
-      </button>
-    </div>
-  );
 
-  const handleLogIn = () => {
-    setProfileDropdownOpen(false);
-    navigate("/Login");
-  };
-
-  const handleSignUp = () => {
-    setProfileDropdownOpen(false);
-    navigate("/Signup");
-  };
 
   return (
     <>
-      <div className="w-full min-h-screen bg-tertiary font-[Archivo] relative">
-        {/* Top Bar */}
-        <div className="mt-24 w-full bg-primary py-4 px-4">
-          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-            {/* Profile Icon with Dropdown */}
-            <div className="relative" id="profile-dropdown">
-              <button
-                onClick={() => setProfileDropdownOpen((open) => !open)}
-                className="flex items-center focus:outline-none"
-              >
-                <img
-                  src="/Assets/user.png"
-                  alt="User Profile"
-                  className="w-12 h-12 rounded-full object-cover border-tertiary cursor-pointer"
-                />
-              </button>
-              <div
-                className={`absolute left-0 mt-2 w-48 bg-white rounded shadow-lg z-50 py-2 transition-all duration-200 ease-out transform
-                 ${profileDropdownOpen ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-2 scale-95 pointer-events-none'}`}
-              >
-                <button
-                  className="flex items-center gap-2 w-full text-left px-4 py-2 text-black hover:bg-gray-100 hover:text-primary transition-colors"
-                  onClick={handleLogIn}
-                >
+      <div className="w-full min-h-screen bg-tertiary font-[Archivo] relative overflow-x-hidden">
+        {/* Product Hero Section */}       
+       <ProductHero
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          isSearchFocused={isSearchFocused}
+          setIsSearchFocused={setIsSearchFocused}
+          productSuggestions={productSuggestions}
+          isLoadingSuggestions={isLoadingSuggestions}
+          categorySuggestions={categorySuggestions}
+          setSelectedType={setSelectedType}
+          setCurrentPage={setCurrentPage}
+          setShowingFavorites={setShowingFavorites}
+          showingFavorites={showingFavorites}
+          navigate={navigate}
+        />
+        
+        {/* Product Filter */}
+        <ProductFilter
+          sortOption={sortOption}
+          setSortOption={setSortOption}
+          setShowSidebar={setShowSidebar}
+        />
 
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500 group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 17v1a3 3 0 01-3 3H7a3 3 0 01-3-3V6a3 3 0 013-3h6a3 3 0 013 3v1m-4 7h12m0 0l-4-4m4 4l-4 4" />
-                  </svg>
-                  Log in
-                </button>
-                <button
-                  className="flex items-center gap-2 w-full text-left px-4 py-2 text-black hover:bg-gray-100 hover:text-primary transition-colors"
-                  onClick={handleSignUp}
-                >
+       {/* Pagination */}
+        <ProductPagination
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        totalPages={totalPages}
+        />
 
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500 group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm0 2c-2.67 0-8 1.337-8 4v3h16v-3c0-2.663-5.33-4-8-4zm6-2v2m0 0v2m0-2h2m-2 0h-2" />
-                  </svg>
-                  Sign Up
-                </button>
-              </div>
-            </div>
-            {/* Search & Icons */}
-            <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-              {/* Animated Search Input */}
-              <div className="relative w-12 focus-within:w-full sm:w-16 sm:focus-within:w-[300px] transition-width ease-in-out duration-300">
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className="block w-full border-none outline-none rounded-full p-3 px-4 text-base placeholder-transparent focus:placeholder-gray-500"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => setIsSearchFocused(true)}
-                  onBlur={() => {
-                    setIsSearchFocused(false)
-                    setSearchQuery('');
-                  }}
-                />
-                <img
-                  src="/Assets/MG.png"
-                  alt="Search"
-                  className="absolute top-1/2 right-6 -translate-y-1/2 pointer-events-none w-5 h-5"
-                />
-                <i className="fa fa-search absolute top-1/2 right-5 -translate-y-1/2 pointer-events-none animate-quacke text-gray-500"></i>
-                {/* Suggestions Dropdown */}
-                {searchQuery && isSearchFocused && (
-                  <div
-                    className="absolute bg-tertiary border border-gray-300 shadow-md mt-1 rounded w-full z-50 max-h-60 overflow-y-auto text-sm"
-                    onMouseDown={(e) => e.preventDefault()} // Prevent blur before click
-                  >
-                    <div className="p-2 text-xs text-gray-500">Products</div>
-                    {isLoadingSuggestions ? (
-                      <div className="px-4 py-1 text-gray-400 italic">Loading suggestions...</div>
-                    ) : productSuggestions.length === 0 ? (
-                      <div className="px-4 py-1 text-gray-400">No matches</div>
-                    ) : (
-                      productSuggestions.map((name, idx) => (
-                        <div
-                          key={idx}
-                          onMouseDown={() => {
-                            setSearchQuery(name);
-                            setSelectedType('ALL');
-                            setCurrentPage(1);
-                            setIsSearchFocused(false);
-                          }}
-                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                        >
-                          {name}
-                        </div>
-                      ))
-                    )}
-                    <div className="p-2 text-xs text-gray-500 border-t">Categories</div>
-                    {categorySuggestions.length === 0 ? (
-                      <div className="px-4 py-1 text-gray-400">No matches</div>
-                    ) : (
-                      categorySuggestions.map((cat, idx) => (
-                        <div
-                          key={idx}
-                          onMouseDown={() => {
-                            setSelectedType(cat);
-                            setSearchQuery('');
-                            setCurrentPage(1);
-                            setIsSearchFocused(false);
-                          }}
-                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                        >
-                          {cat}
-                        </div>
-                      ))
-                    )}
-                  </div>
-                )}
-              </div>
-              {/* Icons */}
-              <div className="flex items-center gap-2 mt-2 sm:mt-0">
-                <button
-                  className="bg-secondary w-10 h-10 flex items-center justify-center rounded"
-                  onClick={() => setShowingFavorites((prev) => !prev)}
-                >
-                  <img
-                    src="./Assets/Favorite Button.png"
-                    alt="Heart Icon"
-                    className="w-6 h-6"
-                    title={showingFavorites ? 'Show All Products' : 'Show Favorites'}
-                  />
-                </button>
-                <button
-                  className="bg-secondary w-10 h-10 flex items-center justify-center rounded"
-                  onClick={() => navigate('/cart')}
-                >
-                  <img
-                    src="./Assets/Add To Cart Button.png"
-                    alt="Cart Icon"
-                    className="w-6 h-6"
-                  />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        {/* Filter Button and Sort Dropdown (together, right side) */}
-        <div className="w-full flex justify-end px-10 mt-6">
-          <div className="flex items-center gap-4">
-            {/* Sort Dropdown */}
-            <label htmlFor="sort" className="text-black font-medium text-sm mr-2">
-              Sort by:
-            </label>
-            <select
-              id="sort"
-              className="bg-white border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              value={sortOption}
-              onChange={e => setSortOption(e.target.value)}
-            >
-              <option value="featured">Featured</option>
-              <option value="az">Alphabetically A-Z</option>
-              <option value="priceLowHigh">Price: Low to High</option>
-              <option value="priceHighLow">Price: High to Low</option>
-            </select>
-            {/* Filter Button */}
-            <button
-              onClick={() => setShowSidebar(true)}
-              className="flex items-center gap-2 text-black font-semibold bg-white px-3 py-2 rounded-md shadow hover:text-primary transition 
-                 hover:shadow-[0_0_10px_#f3cd74] border border-[#f3cd74] focus:outline-none focus:ring-2 focus:ring-[#f3cd74] w-24"
-              style={{ minWidth: "80px", maxWidth: "110px" }}
-            >
-              <img
-                src="./Assets/Filter.png"
-                alt="Filter"
-                className="w-5 h-5 lg:w-6 lg:h-6"
-              />
-              <span className="text-sm">Filter</span>
-            </button>
-          </div>
-        </div>
         {/* Product Grid */}
-        <div className="w-full px-4 py-10 bg-tertiary mx-auto container">
-          <Pagination />
-          {/* Replaced react-window Grid with standard CSS Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 mx-auto justify-items-center">
-            <Suspense fallback={<div>Loading products...</div>}>
-              {displayedProducts.map((product) => {
-                const handleToggleFavorite = () => toggleFavorite(product.name);
-                const handleAddToCart = () => {
-                  const existingCart = JSON.parse(localStorage.getItem('cart')) || [];
-                  const existingIndex = existingCart.findIndex((item) => item.id === product.id);
-                  const stockLeft = product.stock;
-
-                  if (existingIndex !== -1) {
-                    if (existingCart[existingIndex].quantity >= stockLeft) {
-                      // Replaced alert with a custom message box or modal for better UX
-                      // alert(`Only ${stockLeft} in stock. You've reached the limit.`);
-                      // For now, we'll just log to console, but you should implement a UI message
-                      console.warn(`Only ${stockLeft} in stock. You've reached the limit for product: ${product.name}.`);
-                      return;
-                    }
-                    existingCart[existingIndex].quantity += 1;
-                  } else {
-                    existingCart.push({ ...product, quantity: 1 });
-                  }
-
-                  localStorage.setItem('cart', JSON.stringify(existingCart));
-                  setCartItems([...existingCart]);
-                };
-
-                return (
-                  <ProductCard
-                    key={product.id}
-                    id={product.id}
-                    name={product.name}
-                    price={product.price}
-                    description={product.description}
-                    images={product.images}
-                    isFavorite={favorites.includes(product.name)}
-                    toggleFavorite={handleToggleFavorite}
-                    onAddToCart={handleAddToCart}
-                    isOutOfStock={isOutOfStock(product.id, product.stock)}
-                  />
-                );
-              })}
-            </Suspense>
-          </div>
-          <Pagination />
-        </div>
-        {/* Full-Screen Sidebar Overlay with Animation */}
         <div
-          className={`fixed top-0 right-0 h-full bg-white text-black shadow-lg z-50 overflow-y-auto transition-transform duration-300 ease-in-out transform 
-             ${showSidebar ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}
-            w-44 sm:w-48 md:w-56 px-2 sm:px-3 pt-12 border-l border-gray-200`}
+          className="w-full px-2 sm:px-4 py-6 bg-tertiary mx-auto"
+          style={{ maxWidth: "100%" }}
         >
-          {/* Close Button */}
-          <button
-            onClick={() => setShowSidebar(false)}
-            className="absolute top-3 right-4 text-black text-lg sm:text-base md:text-xl font-bold hover:text-primary"
-            title="Close"
-          >
-            ✖
-          </button>
-
-          <div className="p-2 pt-2">
-            <h2 className="text-base sm:text-lg md:text-xl font-bold mb-4">
-              Browse Categories
-            </h2>
-
-            <button
-              onClick={() => {
-                setSelectedType('ALL');
-                setShowSidebar(false);
-              }}
-              className={`block w-full text-left text-black hover:text-primary text-xs ${
-                selectedType === 'ALL' ? 'font-bold text-primary' : ''
-              } pl-3 py-1 rounded transition-colors`}
-            >
-              All Categories
-            </button>
-
-            {categoriesFromDB.length > 0 ? (
-              categoriesFromDB.map((category) => {
-                const handleSelectCategory = (categoryName) => {
-                  setSelectedType(categoryName);
-                  setShowSidebar(false);
-                };
-                return (
-                  <button
-                    key={category.id}
-                    onClick={() => handleSelectCategory(category.name)}
-                    className={`block w-full text-left text-black hover:text-primary text-xs ${
-                      selectedType === category.name ? 'font-bold text-primary' : ''
-                    } pl-3 py-1 rounded transition-colors`}
-                  >
-                    {category.name}
-                  </button>
-                );
-              })
-            ) : (
-              <div className="text-xs text-gray-400">No categories found.</div>
-            )}
-          </div>
+          <ProductGrid
+          className="grid gap-4"
+          style={{ maxWidth: '100%', overflowX: 'hidden' }}
+          displayedProducts={displayedProducts}
+          containerRef={containerRef}
+          containerWidth={containerWidth}
+          columnCount={columnCount}
+          gridHeight={gridHeight}
+          CARD_WIDTH={CARD_WIDTH}
+          CARD_HEIGHT={CARD_HEIGHT}
+          toggleFavorite={toggleFavorite}
+          isOutOfStock={isOutOfStock}
+          setCartItems={setCartItems}
+        />
         </div>
+        {/* Sidebar Overlay */}
+        <ProductSidebar
+        showSidebar={showSidebar}
+        setShowSidebar={setShowSidebar}
+        categoriesFromDB={categoriesFromDB}
+        selectedType={selectedType}
+        setSelectedType={setSelectedType}
+      />
       </div>
     </>
   );
