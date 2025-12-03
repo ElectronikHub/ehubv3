@@ -99,7 +99,7 @@ function HeroSection() {
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 100 100"
-                className="w-16 h-16 fill-none"
+                className="w-12 h-12 fill-none"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >

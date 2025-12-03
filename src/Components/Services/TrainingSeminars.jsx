@@ -21,6 +21,7 @@ function TrainingsAndSeminars() {
 
       {/* Text container with animated background */}
       <div
+      id = "trainings-seminars-section"
         className={`relative max-w-xl w-full rounded-2xl shadow-2xl overflow-hidden cursor-default ${
           visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
         } transition-all duration-700 delay-300`}
